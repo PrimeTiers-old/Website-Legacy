@@ -22,9 +22,17 @@ export function setupRankings() {
   if (!root) return;
 
   root.innerHTML = `
-    <div class="pill-row" role="group" aria-label="Gamemode">
-      ${pill("all", "All modes", null)}
-      ${GAMEMODES.map((m) => pill(m.slug, m.name, modeIcon(m.slug))).join("")}
+    <div class="mode-slider" id="mode-slider">
+      <button type="button" class="slider-btn" data-slide="-1" aria-label="Scroll gamemodes left">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 5-5 5 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="pill-row" role="group" aria-label="Gamemode">
+        ${pill("all", "All", null)}
+        ${GAMEMODES.map((m) => pill(m.slug, m.name, modeIcon(m.slug))).join("")}
+      </div>
+      <button type="button" class="slider-btn" data-slide="1" aria-label="Scroll gamemodes right">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
     <div class="filter-row">
       <div class="filter-slot" id="filter-region"></div>
@@ -66,6 +74,12 @@ export function setupRankings() {
   );
 
   root.addEventListener("click", (e) => {
+    const slide = e.target.closest("[data-slide]");
+    if (slide) {
+      const track = root.querySelector(".pill-row");
+      track.scrollBy({ left: Number(slide.dataset.slide) * track.clientWidth * 0.7, behavior: "smooth" });
+      return;
+    }
     const btn = e.target.closest("[data-mode-filter]");
     if (!btn) return;
     state.mode = btn.dataset.modeFilter;
@@ -81,6 +95,9 @@ export function setupRankings() {
     renderTable();
   });
 
+  window.addEventListener("resize", syncSlider);
+  root.querySelector(".pill-row").addEventListener("scroll", syncSlider, { passive: true });
+
   // Keeps the leaderboard search in sync with the header search (#/leaderboard?q=name).
   window.addEventListener("pt:search", (e) => {
     state.query = e.detail.trim().toLowerCase();
@@ -91,10 +108,27 @@ export function setupRankings() {
   renderTable();
 }
 
+const GRID_ICON = `<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="11" y="3" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="3" y="11" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="11" y="11" width="6" height="6" rx="1.5" fill="currentColor"/></svg>`;
+
 function pill(value, label, icon) {
   const pressed = value === state.mode;
-  const img = icon ? `<img src="${icon}" alt="" width="18" height="18" />` : "";
-  return `<button type="button" class="pill" data-mode-filter="${value}" aria-pressed="${pressed}">${img}<span>${label}</span></button>`;
+  const img = icon ? `<img src="${icon}" alt="" width="18" height="18" />` : GRID_ICON;
+  const kind = icon ? "" : " pill-all";
+  return `<button type="button" class="pill${kind}" data-mode-filter="${value}" aria-pressed="${pressed}">${img}<span>${label}</span></button>`;
+}
+
+// Shows the arrows and edge fades only when the gamemode row overflows.
+function syncSlider() {
+  const slider = document.getElementById("mode-slider");
+  const track = slider?.querySelector(".pill-row");
+  if (!track) return;
+  const max = track.scrollWidth - track.clientWidth;
+  const overflow = max > 2;
+  slider.classList.toggle("is-overflow", overflow);
+  slider.classList.toggle("at-start", track.scrollLeft <= 2);
+  slider.classList.toggle("at-end", track.scrollLeft >= max - 2);
+  slider.querySelector('[data-slide="-1"]').disabled = track.scrollLeft <= 2;
+  slider.querySelector('[data-slide="1"]').disabled = track.scrollLeft >= max - 2;
 }
 
 // The tiers a player has that match the current filters, best first.
@@ -167,6 +201,7 @@ function renderTable() {
     .join("");
 
   hydrateHeads(body);
+  syncSlider();
 }
 
 function tierChip(slug, tier) {

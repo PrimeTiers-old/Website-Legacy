@@ -121,3 +121,168 @@
     flex: 1;
   }
 }
+
+/* Gamemode slider: scrolls sideways when the row runs out of room */
+
+.mode-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mode-slider .pill-row {
+  flex: 1;
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 6px 4px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+}
+
+.mode-slider .pill-row::-webkit-scrollbar {
+  display: none;
+}
+
+.mode-slider .pill {
+  flex: none;
+  scroll-snap-align: start;
+}
+
+.mode-slider.at-start .pill-row {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+
+.mode-slider.at-end .pill-row {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px);
+  mask-image: linear-gradient(90deg, transparent, #000 28px);
+}
+
+.mode-slider:not(.is-overflow) .pill-row {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.slider-btn {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--surface-hi);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 180ms var(--ease), border-color 180ms var(--ease), opacity 180ms var(--ease);
+}
+
+.slider-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.slider-btn:hover:not(:disabled) {
+  background: rgba(155, 92, 255, 0.22);
+  border-color: var(--violet);
+}
+
+.slider-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.mode-slider .pill {
+  padding: 20px 32px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  gap: 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.mode-slider .pill img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+}
+
+.mode-slider .pill.pill-all svg {
+  width: 32px;
+  height: 32px;
+}
+
+.mode-slider .pill-row {
+  gap: 14px;
+}
+
+.mode-slider .slider-btn {
+  width: 60px;
+  height: 60px;
+}
+
+.mode-slider .slider-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* The featured "All gamemodes" pill */
+
+.pill.pill-all {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #7a36f0, #b382ff);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 10px 26px -12px rgba(155, 92, 255, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.pill.pill-all svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.pill.pill-all:hover {
+  color: #fff;
+  border-color: transparent;
+}
+
+.pill.pill-all[aria-pressed="false"] {
+  background: linear-gradient(135deg, rgba(122, 54, 240, 0.35), rgba(179, 130, 255, 0.25));
+  box-shadow: none;
+}
+
+/* "Join Our Discord" button in the leaderboard meta row */
+
+.join-discord {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 20px;
+  border-radius: 999px;
+  background: #5865f2;
+  color: #fff;
+  font-size: 1.02rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 10px 26px -12px rgba(88, 101, 242, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform 200ms var(--ease), background 200ms var(--ease);
+}
+
+.join-discord svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+
+.join-discord:hover {
+  background: #4752c4;
+  transform: translateY(-2px);
+}
