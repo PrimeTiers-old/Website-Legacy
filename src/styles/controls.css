@@ -286,3 +286,237 @@
   background: #4752c4;
   transform: translateY(-2px);
 }
+
+/* Nav hover: a glowing box fades and scales in behind each link, and the icon lifts. */
+
+.tab,
+.tab-button {
+  isolation: isolate;
+}
+
+.tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(155, 92, 255, 0.28), rgba(201, 176, 255, 0.08));
+  border: 1px solid rgba(201, 176, 255, 0.55);
+  box-shadow: 0 0 22px -4px rgba(155, 92, 255, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 240ms var(--ease), transform 300ms var(--ease);
+}
+
+.tab:hover::before,
+.tab:focus-visible::before,
+.tab-button:hover::before,
+.tab-button[aria-expanded="true"]::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.tab:hover,
+.tab-button:hover {
+  color: var(--text);
+  background: transparent;
+}
+
+.tab[aria-current="page"]::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.tab > svg:not(.chev),
+.tab-button > svg:not(.chev) {
+  transition: transform 300ms var(--ease);
+}
+
+.tab:hover > svg:not(.chev),
+.tab-button:hover > svg:not(.chev) {
+  transform: translateY(-2px) scale(1.12);
+}
+
+.tab-button:hover .chev {
+  transform: translateY(2px);
+}
+
+/* Discord link brightens and gets its own glow */
+.tab-discord:hover::before {
+  border-color: rgba(142, 161, 255, 0.7);
+  box-shadow: 0 0 24px -4px rgba(88, 101, 242, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.35), rgba(142, 161, 255, 0.08));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab::before,
+  .tab > svg,
+  .tab-button > svg {
+    transition: none;
+  }
+}
+
+/* Clickable Discord address inside body copy */
+
+.inline-link {
+  color: var(--violet-hi);
+  text-decoration: underline;
+  text-decoration-color: rgba(201, 176, 255, 0.45);
+  text-underline-offset: 3px;
+  transition: color 180ms var(--ease), text-decoration-color 180ms var(--ease);
+}
+
+.inline-link:hover {
+  color: #fff;
+  text-decoration-color: currentColor;
+}
+
+/* Site footer: brand and tagline on the left, link columns on the right, legal below */
+
+.site-footer {
+  max-width: var(--max);
+  margin: clamp(90px, 12vw, 140px) auto 0;
+  padding: 56px var(--gutter) 28px;
+  border-top: 1px solid var(--line);
+  color: var(--text-dim);
+  font-size: 0.98rem;
+}
+
+.footer-top {
+  display: grid;
+  gap: 48px;
+}
+
+@media (min-width: 900px) {
+  .footer-top {
+    grid-template-columns: 1.1fr 1.4fr;
+    gap: 64px;
+  }
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.footer-logo img {
+  border-radius: 10px;
+}
+
+.footer-tagline {
+  margin-top: 16px;
+  max-width: 44ch;
+  line-height: 1.6;
+}
+
+.footer-ip {
+  display: inline-grid;
+  gap: 4px;
+  margin-top: 22px;
+  padding: 14px 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.footer-ip-value {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.footer-ip-meta {
+  font-size: 0.9rem;
+}
+
+.footer-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 36px;
+}
+
+.footer-col h2 {
+  margin-bottom: 14px;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.footer-col ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-col a {
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 160ms var(--ease);
+}
+
+.footer-col a:hover {
+  color: var(--violet-hi);
+}
+
+.footer-bottom {
+  display: grid;
+  gap: 6px;
+  margin-top: 44px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: 0.88rem;
+}
+
+.footer-bottom p {
+  opacity: 0.8;
+}
+
+/* Footer: no hover colour on links. Primetiers.net stays a plain clickable link. */
+
+.footer-col a:hover {
+  color: var(--text-dim);
+}
+
+.footer-ip-value {
+  text-decoration: none;
+}
+
+.footer-ip-value:hover {
+  color: var(--violet-hi);
+  text-decoration: underline;
+}
+
+/* Community: closer to the section above, with a larger Discord embed that scales with the screen */
+
+.community {
+  padding-top: clamp(40px, 6vw, 72px);
+}
+
+.widget-wrap {
+  justify-self: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 10px;
+}
+
+.widget-wrap iframe {
+  width: 100%;
+  height: clamp(520px, 78vh, 840px);
+}
+
+@media (min-width: 900px) {
+  .community {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 56px;
+  }
+}

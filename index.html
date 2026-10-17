@@ -122,14 +122,6 @@
           </div>
         </section>
 
-        <div class="marquee" aria-hidden="true">
-          <div class="marquee-track">
-            <span>Crystal</span><span>Axe</span><span>Sword</span><span>Mace</span><span>Nethertite</span>
-            <span>Pot</span><span>SMP</span><span>UHC</span><span>Cart</span><span>Mace Spear</span>
-            <span>Crystal</span><span>Axe</span><span>Sword</span><span>Mace</span><span>Nethertite</span>
-            <span>Pot</span><span>SMP</span><span>UHC</span><span>Cart</span><span>Mace Spear</span>
-          </div>
-        </div>
 
         <section class="section" id="modes" aria-labelledby="modes-title">
           <div class="section-head">
@@ -148,7 +140,7 @@
           <ol class="timeline" data-stagger-root>
             <li>
               <h3>Join the Discord</h3>
-              <p>Go to discord.gg/primetiers and open the request-test channel for your gamemode.</p>
+              <p>Go to <a class="inline-link" href="https://discord.gg/primetiers" target="_blank" rel="noopener">discord.gg/primetiers</a> and open the request-test channel for your gamemode.</p>
             </li>
             <li>
               <h3>Join the queue</h3>
@@ -298,12 +290,53 @@
       </div>
     </main>
 
-    <footer class="footer">
-      <span class="footer-brand">
-        <img src="/images/icon.png" alt="" width="24" height="24" />
-        © <span id="year"></span> PrimeTiers
-      </span>
-      <span>Primetiers.net · discord.gg/primetiers</span>
+    <footer class="site-footer">
+      <div class="footer-top">
+        <div class="footer-intro">
+          <a class="footer-logo" href="#/">
+            <img src="/images/icon.png" alt="" width="40" height="40" />
+            <span>PrimeTiers</span>
+          </a>
+          <p class="footer-tagline">The Minecraft PvP tier testing network. Tier tests, leaderboards and events for cracked and premium players.</p>
+          <div class="footer-ip">
+            <a class="footer-ip-value" href="#/ip">Primetiers.net</a>
+            <span class="footer-ip-meta">Cracked &amp; premium welcome</span>
+          </div>
+        </div>
+
+        <nav class="footer-cols" aria-label="Footer">
+          <div class="footer-col">
+            <h2>Leaderboard</h2>
+            <ul>
+              <li><a href="#/leaderboard">Mace</a></li>
+              <li><a href="#/leaderboard">Nethertite</a></li>
+              <li><a href="#/leaderboard">Pot</a></li>
+              <li><a href="#/leaderboard">SMP</a></li>
+              <li><a href="#/leaderboard">UHC</a></li>
+              <li><a href="#/leaderboard">Cart</a></li>
+              <li><a href="#/leaderboard">Mace Spear</a></li>
+              <li><a href="#/leaderboard">Crystal</a></li>
+              <li><a href="#/leaderboard">Axe</a></li>
+              <li><a href="#/leaderboard">Sword</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h2>Network</h2>
+            <ul>
+              <li><a href="#/ip">Server IP</a></li>
+              <li><a href="#/events">Events</a></li>
+              <li><a href="https://discord.gg/primetiers" target="_blank" rel="noopener">Discord</a></li>
+              <li><a href="#how">How testing works</a></li>
+              <li><a href="#tiers">Tier scale</a></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© <span id="year"></span> PrimeTiers. All rights reserved.</p>
+        <p>Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</p>
+      </div>
     </footer>
 
     <script type="module" src="/src/main.js"></script>

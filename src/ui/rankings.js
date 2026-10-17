@@ -117,19 +117,6 @@ function pill(value, label, icon) {
   return `<button type="button" class="pill${kind}" data-mode-filter="${value}" aria-pressed="${pressed}">${img}<span>${label}</span></button>`;
 }
 
-// Shows the arrows and edge fades only when the gamemode row overflows.
-function syncSlider() {
-  const slider = document.getElementById("mode-slider");
-  const track = slider?.querySelector(".pill-row");
-  if (!track) return;
-  const max = track.scrollWidth - track.clientWidth;
-  const overflow = max > 2;
-  slider.classList.toggle("is-overflow", overflow);
-  slider.classList.toggle("at-start", track.scrollLeft <= 2);
-  slider.classList.toggle("at-end", track.scrollLeft >= max - 2);
-  slider.querySelector('[data-slide="-1"]').disabled = track.scrollLeft <= 2;
-  slider.querySelector('[data-slide="1"]').disabled = track.scrollLeft >= max - 2;
-}
 
 // The tiers a player has that match the current filters, best first.
 function visibleTiers(player) {
@@ -212,6 +199,20 @@ function tierChip(slug, tier) {
       <span class="chip-mode">${name}</span>
       <span class="chip-tier">${tier}</span>
     </li>`;
+}
+
+// Shows the arrows and edge fades only when the gamemode row overflows.
+function syncSlider() {
+  const slider = document.getElementById("mode-slider");
+  const track = slider?.querySelector(".pill-row");
+  if (!track) return;
+  const max = track.scrollWidth - track.clientWidth;
+  const overflow = max > 2;
+  slider.classList.toggle("is-overflow", overflow);
+  slider.classList.toggle("at-start", track.scrollLeft <= 2);
+  slider.classList.toggle("at-end", track.scrollLeft >= max - 2);
+  slider.querySelector('[data-slide="-1"]').disabled = track.scrollLeft <= 2;
+  slider.querySelector('[data-slide="1"]').disabled = track.scrollLeft >= max - 2;
 }
 
 function escapeHtml(text) {
