@@ -95,6 +95,16 @@ export function setupRankings() {
     renderTable();
   });
 
+  // Opening the leaderboard always starts the gamemode row at the far left.
+  window.addEventListener("hashchange", () => {
+    if (!window.location.hash.startsWith("#/leaderboard")) return;
+    setTimeout(() => {
+      const track = root.querySelector(".pill-row");
+      track.scrollTo({ left: 0, behavior: "instant" });
+      syncSlider();
+    }, 0);
+  });
+
   window.addEventListener("resize", syncSlider);
   root.querySelector(".pill-row").addEventListener("scroll", syncSlider, { passive: true });
 
