@@ -1,0 +1,237 @@
+/* Motion layer. Everything hidden here is gated on html.motion,
+   which motion.js adds only when reduced motion is not requested. */
+
+/* Headline: each word rises out of a mask */
+
+.motion .hero h1 .word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.motion .hero h1 .word > span {
+  display: inline-block;
+  animation: word-up 1000ms var(--ease) both;
+  animation-delay: calc(var(--w, 0) * 85ms + 180ms);
+}
+
+@keyframes word-up {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* Hero entrance */
+
+.motion .eyebrow,
+.motion .lead,
+.motion .hero-actions,
+.motion .stats {
+  animation: rise 900ms var(--ease) both;
+}
+
+.motion .eyebrow {
+  animation-delay: 0ms;
+}
+
+.motion .lead {
+  animation-delay: 520ms;
+}
+
+.motion .hero-actions {
+  animation-delay: 640ms;
+}
+
+.motion .stats {
+  animation-delay: 760ms;
+}
+
+.motion .hero-logo {
+  animation: logo-in 1400ms var(--ease) 200ms both, glow 6s ease-in-out 1600ms infinite;
+}
+
+.motion .hero-bg {
+  animation: bg-in 2400ms var(--ease) both;
+}
+
+.motion .site-header {
+  animation: header-in 800ms var(--ease) both;
+}
+
+.motion .marquee {
+  animation: rise 900ms var(--ease) 900ms both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85) rotate(-4deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 28px rgba(155, 92, 255, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 54px rgba(201, 176, 255, 0.65));
+  }
+}
+
+@keyframes bg-in {
+  from {
+    opacity: 0;
+    scale: 1.08;
+  }
+  to {
+    opacity: 0.42;
+    scale: 1;
+  }
+}
+
+@keyframes header-in {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Scroll reveals */
+
+.motion [data-reveal] {
+  opacity: 0;
+  transform: translateY(40px);
+  filter: blur(6px);
+  transition: opacity 900ms var(--ease), transform 900ms var(--ease), filter 900ms var(--ease);
+}
+
+.motion [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* Staggered children inside a revealed group */
+
+.motion [data-stagger] > * {
+  opacity: 0;
+  transform: translateY(34px) scale(0.97);
+  transition: opacity 760ms var(--ease), transform 760ms var(--ease);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+
+.motion [data-stagger].is-visible > * {
+  opacity: 1;
+  transform: none;
+}
+
+/* Timeline line draws in when the group is revealed */
+
+.motion .timeline::before {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1400ms var(--ease) 200ms;
+}
+
+.motion .timeline.is-visible::before {
+  transform: none;
+}
+
+/* Tier columns lift on hover */
+
+.tier-col {
+  transition: transform 300ms var(--ease), border-color 300ms var(--ease), background 300ms var(--ease);
+}
+
+.tier-col:hover {
+  transform: translateY(-4px);
+  border-color: rgba(155, 92, 255, 0.45);
+  background: var(--surface-hi);
+}
+
+/* Step cards and gamemode tiles, spotlight follows the cursor */
+
+.steps li,
+.panel {
+  position: relative;
+}
+
+/* Header tabs slide an indicator under the active tab */
+
+.tab {
+  transition: color 240ms var(--ease), background 240ms var(--ease), box-shadow 240ms var(--ease);
+}
+
+/* Buttons sweep a light band on hover */
+
+.btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -90%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-22deg);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.btn:hover::after {
+  animation: sweep 1000ms var(--ease);
+}
+
+@keyframes sweep {
+  to {
+    left: 140%;
+  }
+}
+
+/* Community widget floats gently */
+
+.motion .widget-wrap {
+  animation: float 7s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -10px;
+  }
+}
+
+/* Reduce stacking when the page is narrow */
+
+@media (max-width: 720px) {
+  .motion .widget-wrap {
+    animation: none;
+  }
+}
