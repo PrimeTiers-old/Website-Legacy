@@ -15,7 +15,6 @@ const mode = (slug) => GAMEMODES.find((m) => m.slug === slug);
 const modeIcon = (slug) => `/images/modes/${slug}.png`;
 const rank = (tier) => TIER_ORDER.indexOf(tier);
 const color = (tier) => TIER_COLORS[tier] ?? "#9aa3b2";
-const roleSlug = (role) => role.toLowerCase().replace(/\s+/g, "-");
 
 export function setupRankings() {
   const root = document.getElementById("rankings-filters");
@@ -166,7 +165,7 @@ function renderTable() {
 
   if (rows.length === 0) {
     body.innerHTML = `
-      <tr><td colspan="5" class="empty">No players match these filters. Try another gamemode or clear the search.</td></tr>`;
+      <tr><td colspan="4" class="empty">No players match these filters. Try another gamemode or clear the search.</td></tr>`;
     return;
   }
 
@@ -186,7 +185,6 @@ function renderTable() {
             </span>
           </span>
         </td>
-        <td class="col-role"><span class="role role-${roleSlug(player.role)}">${player.role}</span></td>
         <td class="col-region"><span class="region" style="--c:${REGION_COLORS[player.region] ?? "#9aa3b2"}">${player.region}</span></td>
         <td class="col-tiers">
           <ul class="tier-chips">

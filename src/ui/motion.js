@@ -5,7 +5,7 @@
 // and for visitors who have reduced motion turned on.
 
 const REVEAL = "[data-reveal]";
-const SPOTLIGHT = ".mode, .steps li, .panel, .cta";
+const SPOTLIGHT = ".mode, .panel, .cta";
 
 export function setupMotion() {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -25,14 +25,41 @@ export function setupMotion() {
   window.addEventListener("hashchange", observeReveals);
 }
 
-// Wraps each word in a span so CSS can stagger them.
+// Wraps each word in a span so CSS can stagger it. Text inside an element with class "accent"
+// gets "accent-word" on each word, so the accent gradient can be applied to it.
+// Keeps the child elements and their classes.
 function splitWords(el) {
   if (!el) return;
-  const words = el.textContent.trim().split(/\s+/);
   el.setAttribute("aria-label", el.textContent.trim());
-  el.innerHTML = words
-    .map((w, i) => `<span class="word" aria-hidden="true" style="--w:${i}"><span>${w}</span></span>`)
-    .join(" ");
+  let index = 0;
+
+  const walk = (node, accent) => {
+    [...node.childNodes].forEach((child) => {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const frag = document.createDocumentFragment();
+        child.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (!part.trim()) {
+            frag.append(part);
+            return;
+          }
+          const word = document.createElement("span");
+          word.className = accent ? "word accent-word" : "word";
+          word.setAttribute("aria-hidden", "true");
+          word.style.setProperty("--w", index++);
+          const inner = document.createElement("span");
+          inner.textContent = part;
+          word.append(inner);
+          frag.append(word);
+        });
+        child.replaceWith(frag);
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        walk(child, accent || child.classList.contains("accent"));
+      }
+    });
+  };
+
+  walk(el, false);
 }
 
 // Marks sections and groups that should reveal as they enter the screen.
@@ -68,10 +95,9 @@ function observeReveals() {
   });
 }
 
-// Count-up numbers. Values like "HT1–LT5" are left alone.
+// Count-up numbers start at 0 and climb to their value when the stats strip is revealed.
 function setupCounters() {
   document.querySelectorAll("[data-count]").forEach((el) => {
-    // Run when the stats strip itself is revealed (handled in observeReveals).
     el.textContent = "0";
   });
 }

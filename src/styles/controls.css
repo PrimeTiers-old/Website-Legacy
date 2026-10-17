@@ -520,3 +520,129 @@
     gap: 56px;
   }
 }
+
+/* Server IP dropdown: a glowing card with the address and a copy button */
+
+.dropdown-ip .dropdown-menu.ip-pop {
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(290px, 32vw, 500px);
+  min-width: 0;
+  padding: clamp(16px, 2vw, 28px);
+  display: grid;
+  gap: clamp(10px, 1.2vw, 16px);
+  background: linear-gradient(160deg, rgba(155, 92, 255, 0.28), rgba(16, 13, 26, 0.98) 55%);
+  border-color: rgba(201, 176, 255, 0.45);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.8), 0 0 40px -8px rgba(155, 92, 255, 0.6);
+}
+
+.dropdown-ip .dropdown-menu.ip-pop[hidden] {
+  display: none;
+}
+
+.ip-pop-label {
+  color: var(--violet-hi);
+  font-family: var(--font-mono);
+  font-size: clamp(0.78rem, 0.6vw + 0.45rem, 1rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ip-pop-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: clamp(12px, 1.4vw, 22px) clamp(14px, 1.6vw, 24px);
+  border: 1px solid rgba(201, 176, 255, 0.4);
+  border-radius: 14px;
+  background: rgba(10, 8, 18, 0.7);
+  color: var(--text);
+  font: inherit;
+  font-size: clamp(1.05rem, 1.5vw + 0.5rem, 1.9rem);
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease), transform 200ms var(--ease);
+}
+
+.ip-pop-value:hover {
+  border-color: var(--violet-hi);
+  box-shadow: 0 0 24px -6px rgba(155, 92, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+.ip-pop-action {
+  flex: none;
+  padding: clamp(5px, 0.6vw, 9px) clamp(10px, 1vw, 16px);
+  border-radius: 999px;
+  background: var(--violet);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: clamp(0.8rem, 0.8vw + 0.4rem, 1.05rem);
+  font-weight: 600;
+}
+
+.ip-pop-meta {
+  color: var(--text-dim);
+  font-size: clamp(0.85rem, 0.7vw + 0.5rem, 1.05rem);
+}
+
+.dropdown-ip .ip-pop-link {
+  display: block;
+  padding: 10px 0 0;
+  color: var(--violet-hi);
+  font-size: 0.98rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: none;
+}
+
+.dropdown-ip .ip-pop-link:hover {
+  background: none;
+  text-decoration: underline;
+}
+
+/* Tier badges: colour gradients per tier. Used on leaderboard chips and the tier scale. */
+
+.badge {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 45%, #ffffff));
+  color: #120a18;
+  border: 1px solid color-mix(in srgb, var(--c) 70%, #ffffff);
+  box-shadow: 0 10px 28px -10px var(--c), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.badge::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -70%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  transform: skewX(-20deg);
+  animation: glint 4s var(--ease) infinite;
+  pointer-events: none;
+}
+
+.tier-chip {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c) 30%, transparent), rgba(255, 255, 255, 0.03));
+  border: 1px solid color-mix(in srgb, var(--c) 65%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 6px 18px -12px var(--c);
+}
+
+.chip-tier {
+  background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 45%, #ffffff));
+  color: #120a18;
+  font-weight: 800;
+  box-shadow: 0 0 14px -4px var(--c);
+}
+
+.chip-mode {
+  color: #f2f0f8;
+  font-weight: 600;
+}

@@ -328,3 +328,54 @@ html {
   border: 1px solid var(--line);
   border-radius: var(--radius);
 }
+
+/* Main page legibility pass.
+   Headings were gradient-clipped text that rendered too dark on the banner, so they are solid and bright now. */
+
+.hero h1,
+.section-head h2,
+.community-copy h2,
+.cta h2 {
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: #ffffff;
+  text-shadow: 0 0 30px rgba(155, 92, 255, 0.5), 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* "Earn your place." gets a bright violet-to-pink gradient, applied per word */
+.accent-word > span {
+  background: linear-gradient(90deg, #d9c4ff 0%, #a86cff 50%, #ff7ad9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 18px rgba(155, 92, 255, 0.55));
+}
+
+/* HT1 to LT5 in the tier colours */
+.stat-value.tier-range {
+  background: linear-gradient(90deg, #ff5fa2, #ffd166 30%, #3ddc97 55%, #4aa3ff 75%, #9aa3b2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Banner: more present, with a dark fade on the left so the text reads clearly */
+.hero-fade {
+  background:
+    linear-gradient(90deg, rgba(6, 5, 11, 0.92) 0%, rgba(6, 5, 11, 0.5) 45%, rgba(6, 5, 11, 0.1) 80%),
+    linear-gradient(180deg, transparent 45%, var(--bg) 100%);
+}
+
+.hero {
+  min-height: 0;
+  padding-bottom: clamp(16px, 2.5vw, 32px);
+}
+
+/* Less empty space between the hero and the Gamemodes heading */
+#modes {
+  padding-top: clamp(40px, 5vw, 64px);
+}

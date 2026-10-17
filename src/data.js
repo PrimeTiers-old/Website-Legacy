@@ -65,6 +65,5 @@ export const REGION_COLORS = {
 export const PAGES = [
   { id: "home", label: "Home", href: "#/" },
   { id: "leaderboard", label: "Leaderboard", href: "#/leaderboard" },
-  { id: "ip", label: "Server IP", href: "#/ip" },
   { id: "events", label: "Events", href: "#/events" },
 ];

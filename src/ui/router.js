@@ -1,13 +1,12 @@
 // Hash routing between pages.
 //   #/              Home
 //   #/leaderboard   Leaderboard (optional ?q=name pre-fills the search)
-//   #/ip            Server IP
 //   #/events        Events
 // Old links: #/rankings goes to the leaderboard.
 // Plain anchors such as #how stay on Home and scroll to that section.
 
 const ALIASES = { rankings: "leaderboard" };
-const VIEWS = ["home", "leaderboard", "ip", "events"];
+const VIEWS = ["home", "leaderboard", "events"];
 
 export function setupRouter() {
   window.addEventListener("hashchange", route);
