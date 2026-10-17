@@ -1,12 +1,13 @@
 // Player heads and account type (Premium or Cracked).
 //
-// Flow per username:
+// Every head starts as a default skin, Steve or Alex, chosen from the name so it stays the same.
+// Then the lookup runs:
 //   1. localStorage (7 days). Repeat visits make no network calls.
 //   2. /api/uuid/<name>. A Pages Function when deployed, and a Vite middleware in local dev
 //      (see vite.config.js). Both cache the answer.
 //   3. Premium: the real head from mc-heads.net, keyed by UUID. Labelled "Premium".
-//      Cracked: a monogram with a dashed frame, labelled "Cracked".
-//      If the lookup itself fails: monogram, labelled "Unavailable", and not cached.
+//      Cracked: the default skin stays, labelled "Cracked".
+//      If the lookup fails: the default skin stays, labelled "Unavailable", and nothing is cached.
 //
 // Any element with data-head="<name>" gets the head. Any element with data-acct="<name>"
 // gets the account label. Concurrent lookups for the same name share one request.
@@ -15,6 +16,12 @@ const STORAGE_KEY = "pt-heads-v1";
 const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const HEAD_URL = (uuid) => `https://mc-heads.net/avatar/${uuid}/64`;
 const UNAVAILABLE = { unavailable: true };
+
+// Steve or Alex, picked from the name so the same player always gets the same default.
+export function defaultSkin(name) {
+  const sum = [...name.toLowerCase()].reduce((total, ch) => total + ch.charCodeAt(0), 0);
+  return sum % 2 === 0 ? "/images/heads/steve.svg" : "/images/heads/alex.svg";
+}
 
 const inflight = new Map();
 let store = null;
@@ -114,17 +121,16 @@ export function hydrateHeads(root = document) {
 
     if (!result.premium) {
       labelAccounts(name, "Cracked", "acct-cracked", root);
-      root.querySelectorAll(`[data-head="${esc(name)}"]`).forEach((slot) => slot.classList.add("is-cracked"));
       return;
     }
 
     labelAccounts(name, "Premium", "acct-premium", root);
     root.querySelectorAll(`[data-head="${esc(name)}"]`).forEach((slot) => {
-      const img = new Image(34, 34);
+      const img = new Image(56, 56);
       img.alt = "";
       img.decoding = "async";
-      img.width = 34;
-      img.height = 34;
+      img.width = 56;
+      img.height = 56;
       img.onload = () => {
         slot.classList.add("has-head");
         slot.replaceChildren(img);

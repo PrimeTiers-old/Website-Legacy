@@ -1,6 +1,7 @@
 import { GAMEMODES, REGIONS, REGION_COLORS, TIER_COLORS, TIER_ORDER } from "../data.js";
 import { PLAYERS } from "../data/players.js";
-import { hydrateHeads } from "./heads.js";
+import { defaultSkin, hydrateHeads } from "./heads.js";
+import { createSelect } from "./select.js";
 
 // Filter state. "all" means no filter on that control.
 const state = {
@@ -11,7 +12,7 @@ const state = {
 };
 
 const mode = (slug) => GAMEMODES.find((m) => m.slug === slug);
-const modeIcon = (slug) => `/images/modes/${slug}.svg`;
+const modeIcon = (slug) => `/images/modes/${slug}.png`;
 const rank = (tier) => TIER_ORDER.indexOf(tier);
 const color = (tier) => TIER_COLORS[tier] ?? "#9aa3b2";
 const roleSlug = (role) => role.toLowerCase().replace(/\s+/g, "-");
@@ -26,25 +27,43 @@ export function setupRankings() {
       ${GAMEMODES.map((m) => pill(m.slug, m.name, modeIcon(m.slug))).join("")}
     </div>
     <div class="filter-row">
-      <label class="select-wrap">
-        <span class="visually-hidden">Region</span>
-        <select id="filter-region">
-          <option value="all">All regions</option>
-          ${REGIONS.map((r) => `<option value="${r}">${r}</option>`).join("")}
-        </select>
-      </label>
-      <label class="select-wrap">
-        <span class="visually-hidden">Tier</span>
-        <select id="filter-tier">
-          <option value="all">All tiers</option>
-          ${TIER_ORDER.map((t) => `<option value="${t}">${t}</option>`).join("")}
-        </select>
-      </label>
+      <div class="filter-slot" id="filter-region"></div>
+      <div class="filter-slot" id="filter-tier"></div>
       <label class="search-wrap">
         <span class="visually-hidden">Search player</span>
         <input id="filter-query" type="search" placeholder="Search player" autocomplete="off" />
       </label>
     </div>`;
+
+  document.getElementById("filter-region").append(
+    createSelect({
+      label: "Region",
+      value: "all",
+      options: [
+        { value: "all", label: "All regions" },
+        ...REGIONS.map((r) => ({ value: r, label: r, color: REGION_COLORS[r] })),
+      ],
+      onChange: (v) => {
+        state.region = v;
+        renderTable();
+      },
+    })
+  );
+
+  document.getElementById("filter-tier").append(
+    createSelect({
+      label: "Tier",
+      value: "all",
+      options: [
+        { value: "all", label: "All tiers" },
+        ...TIER_ORDER.map((t) => ({ value: t, label: t, color: TIER_COLORS[t] })),
+      ],
+      onChange: (v) => {
+        state.tier = v;
+        renderTable();
+      },
+    })
+  );
 
   root.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-mode-filter]");
@@ -56,14 +75,6 @@ export function setupRankings() {
     renderTable();
   });
 
-  document.getElementById("filter-region").addEventListener("change", (e) => {
-    state.region = e.target.value;
-    renderTable();
-  });
-  document.getElementById("filter-tier").addEventListener("change", (e) => {
-    state.tier = e.target.value;
-    renderTable();
-  });
   const input = document.getElementById("filter-query");
   input.addEventListener("input", (e) => {
     state.query = e.target.value.trim().toLowerCase();
@@ -135,7 +146,9 @@ function renderTable() {
         <td class="col-rank">${i + 1}</td>
         <td class="col-player">
           <span class="player">
-            <span class="head" data-head="${escapeHtml(player.name)}" aria-hidden="true">${player.name.slice(0, 2).toUpperCase()}</span>
+            <span class="head" data-head="${escapeHtml(player.name)}">
+              <img src="${defaultSkin(player.name)}" alt="" width="56" height="56" />
+            </span>
             <span class="player-meta">
               <span class="player-name">${escapeHtml(player.name)}</span>
               <span class="acct acct-checking" data-acct="${escapeHtml(player.name)}">Checking</span>

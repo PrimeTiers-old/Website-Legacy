@@ -1,0 +1,123 @@
+/* Custom dropdowns (replace the native <select>). */
+
+.filter-slot {
+  position: relative;
+  display: inline-flex;
+}
+
+.pt-select {
+  position: relative;
+  display: inline-flex;
+}
+
+.pt-select-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+  height: 52px;
+  padding: 0 18px;
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
+}
+
+.pt-select-btn:hover,
+.pt-select.is-open .pt-select-btn {
+  border-color: var(--violet);
+}
+
+.pt-select-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(155, 92, 255, 0.25);
+}
+
+.pt-select-text {
+  flex: 1;
+  text-align: left;
+}
+
+.pt-select-caret {
+  width: 14px;
+  height: 14px;
+  color: var(--text-dim);
+  transition: transform 220ms var(--ease);
+}
+
+.pt-select.is-open .pt-select-caret {
+  transform: rotate(180deg);
+}
+
+.pt-select-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.pt-select-btn .pt-select-dot {
+  color: inherit;
+}
+
+.pt-select-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 70;
+  min-width: 100%;
+  max-height: 340px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 8px;
+  list-style: none;
+  background: rgba(16, 13, 26, 0.98);
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(155, 92, 255, 0.08);
+  backdrop-filter: blur(18px);
+  animation: menu-in 200ms var(--ease) both;
+}
+
+.pt-select-menu[hidden] {
+  display: none;
+}
+
+.pt-select-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  cursor: pointer;
+  white-space: nowrap;
+  outline: none;
+  transition: background 150ms var(--ease), color 150ms var(--ease);
+}
+
+.pt-select-option:hover,
+.pt-select-option:focus-visible {
+  background: rgba(155, 92, 255, 0.16);
+  color: var(--text);
+}
+
+.pt-select-option.is-selected {
+  color: var(--violet-hi);
+  font-weight: 600;
+}
+
+/* Keep the menu scrollable and styled on small screens */
+
+@media (max-width: 640px) {
+  .pt-select-btn {
+    min-width: 0;
+    flex: 1;
+  }
+}

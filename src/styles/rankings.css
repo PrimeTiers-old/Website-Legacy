@@ -220,7 +220,7 @@
 .tier-chip img {
   width: 22px;
   height: 22px;
-  border-radius: 7px;
+  image-rendering: pixelated;
 }
 
 .chip-mode {

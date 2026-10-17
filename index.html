@@ -212,22 +212,35 @@
 
       <!-- LEADERBOARD -->
       <div data-view="leaderboard" hidden>
-        <section class="section rankings" aria-labelledby="rankings-title">
-          <div class="section-head">
-            <p class="section-kicker">Leaderboard</p>
-            <h2 id="rankings-title">Player leaderboard</h2>
-            <p>Filter by gamemode, region, or tier. Players are sorted from highest tier to lowest.</p>
+        <section class="section rankings" aria-label="Leaderboard">
+          <div class="play-embed">
+            <div class="play-embed-copy">
+              <p class="play-embed-kicker">Want a tier?</p>
+              <h2>Play with PrimeTiers</h2>
+              <p>Join the Discord, pick a gamemode, and queue for your test.</p>
+              <a class="btn btn-primary btn-xl" href="https://discord.gg/primetiers" target="_blank" rel="noopener">Join to play</a>
+            </div>
+            <div class="play-embed-widget">
+              <iframe
+                src="https://discord.com/widget?id=1498238605179748413&theme=dark"
+                width="350"
+                height="420"
+                allowtransparency="true"
+                frameborder="0"
+                sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+                title="PrimeTiers Discord server widget"
+                loading="lazy"
+              ></iframe>
+            </div>
           </div>
-
-          <p class="sample-banner" role="note">Sample data. These rows are placeholders until real results are loaded.</p>
 
           <div id="rankings-filters" class="filters"></div>
 
           <div class="table-meta">
             <span id="rankings-count" aria-live="polite"></span>
             <span class="legend">
-              <span class="acct acct-premium">Premium</span> real skin head
-              <span class="acct acct-cracked">Cracked</span> monogram
+              <span class="acct acct-premium">Premium</span> real skin
+              <span class="acct acct-cracked">Cracked</span> default Steve or Alex skin
             </span>
           </div>
 

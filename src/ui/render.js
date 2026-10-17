@@ -12,7 +12,7 @@ export function renderModes() {
     (mode, i) => `
       <li class="${i === 0 ? "mode-wide" : ""}">
         <a class="mode" href="${DISCORD_URL}" target="_blank" rel="noopener" data-mode="${mode.slug}">
-          <img class="mode-icon" src="/images/modes/${mode.slug}.svg" alt="" width="48" height="48" loading="lazy" />
+          <img class="mode-icon" src="/images/modes/${mode.slug}.png" alt="" width="48" height="48" loading="lazy" />
           <span class="mode-name">${mode.name}</span>
           <span class="mode-cta">Get tested<span aria-hidden="true"> →</span></span>
         </a>

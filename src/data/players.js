@@ -8,7 +8,23 @@
 //   tiers   gamemode slug (from GAMEMODES in data.js) -> tier (HT1..LT5)
 
 export const PLAYERS = [
-  { name: "burnet01", region: "NA", role: "Owner", tiers: { crystal: "HT1", sword: "HT2", uhc: "LT1" } },
+  {
+    name: "burnet01",
+    region: "NA",
+    role: "Owner",
+    tiers: {
+      crystal: "HT1",
+      axe: "LT1",
+      sword: "HT2",
+      mace: "LT2",
+      nethertite: "HT3",
+      pot: "LT3",
+      smp: "HT4",
+      uhc: "LT4",
+      cart: "HT5",
+      "mace-spear": "LT5",
+    },
+  },
   { name: "SampleTwo", region: "EU", role: "Senior Tester", tiers: { sword: "HT1", mace: "LT2" } },
   { name: "SampleThree", region: "NA", role: "Tester", tiers: { axe: "LT1", pot: "HT3", smp: "LT3" } },
   { name: "SampleFour", region: "AS", role: "Admin", tiers: { uhc: "HT2", cart: "LT2" } },
