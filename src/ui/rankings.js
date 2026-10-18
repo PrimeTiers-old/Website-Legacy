@@ -1,4 +1,4 @@
-import { GAMEMODES, REGIONS, REGION_COLORS, TIER_COLORS, TIER_ORDER } from "../data.js";
+import { GAMEMODES, REGIONS, REGION_ACCENTS, REGION_COLORS, TIER_COLORS, TIER_ORDER } from "../data.js";
 import { PLAYERS } from "../data/players.js";
 import { defaultSkin, hydrateHeads } from "./heads.js";
 import { createSelect } from "./select.js";
@@ -63,7 +63,7 @@ export function setupRankings() {
       value: "all",
       options: [
         { value: "all", label: "All tiers" },
-        ...TIER_ORDER.map((t) => ({ value: t, label: t, color: TIER_COLORS[t] })),
+        ...TIER_ORDER.map((t) => ({ value: t, label: t, color: TIER_COLORS[t], pill: true })),
       ],
       onChange: (v) => {
         state.tier = v;
@@ -185,7 +185,7 @@ function renderTable() {
             </span>
           </span>
         </td>
-        <td class="col-region"><span class="region" style="--c:${REGION_COLORS[player.region] ?? "#9aa3b2"}">${player.region}</span></td>
+        <td class="col-region"><span class="region" style="--c:${REGION_COLORS[player.region] ?? "#9aa3b2"};--c2:${REGION_ACCENTS[player.region] ?? "#ffffff"}">${player.region}</span></td>
         <td class="col-tiers">
           <ul class="tier-chips">
             ${tiers.map(([slug, tier]) => tierChip(slug, tier)).join("")}

@@ -646,3 +646,45 @@
   color: #f2f0f8;
   font-weight: 600;
 }
+
+/* Tier filter: selected tier fills the button, and each tier option is a gradient pill */
+
+.pt-select-btn.is-pill {
+  background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 45%, #ffffff));
+  border-color: color-mix(in srgb, var(--c) 70%, #ffffff);
+  color: #120a18;
+  font-weight: 800;
+  box-shadow: 0 10px 26px -10px var(--c), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.pt-select-btn.is-pill .pt-select-dot {
+  background: #120a18 !important;
+  box-shadow: none;
+}
+
+.pt-select-btn.is-pill .pt-select-caret {
+  color: #120a18;
+}
+
+.pt-select-option.is-pill {
+  margin: 4px 0;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 45%, #ffffff));
+  color: #120a18;
+  font-weight: 800;
+  box-shadow: 0 8px 18px -10px var(--c), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.pt-select-option.is-pill .pt-select-dot {
+  background: #120a18 !important;
+  box-shadow: none;
+}
+
+.pt-select-option.is-pill:hover,
+.pt-select-option.is-pill:focus-visible,
+.pt-select-option.is-pill.is-selected {
+  color: #120a18;
+  filter: brightness(1.1);
+  background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 45%, #ffffff));
+}

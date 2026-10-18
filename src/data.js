@@ -51,14 +51,26 @@ export const REGIONS = ["NA", "EU", "SA", "AS", "AU", "ME", "AF"];
 export const ROLES = ["Owner", "Admin", "Senior Tester", "Tester", "Member"];
 
 // One colour per region. Drives the region tag, its dot, and its glint on the leaderboard.
+// Each region uses the flag of one representative nation: REGION_COLORS is the main colour,
+// REGION_ACCENTS the second colour (used for the glint). Brightened slightly for the dark theme.
 export const REGION_COLORS = {
-  NA: "#4aa3ff", // blue
-  EU: "#b57bff", // violet
-  SA: "#3ddc97", // green
-  AS: "#ff5fa2", // pink
-  AU: "#ffd166", // gold
-  ME: "#ff8a4c", // orange
-  AF: "#2ec4d6", // cyan
+  NA: "#e0313f", // USA red
+  EU: "#3d6dff", // EU flag blue
+  SA: "#16b35a", // Brazil green
+  AS: "#ff3b3b", // China red
+  AU: "#2f63e0", // Australia blue
+  ME: "#12a86b", // UAE green
+  AF: "#19a64a", // Kenya green
+};
+
+export const REGION_ACCENTS = {
+  NA: "#4f7dff", // USA blue
+  EU: "#ffd23f", // EU flag gold
+  SA: "#ffe033", // Brazil yellow
+  AS: "#ffd23f", // China gold
+  AU: "#ff4d5e", // Australia red
+  ME: "#ff4a4a", // UAE red
+  AF: "#ff4a4a", // Kenya red
 };
 
 // Top-level pages. "discord" is an external link, not a page.

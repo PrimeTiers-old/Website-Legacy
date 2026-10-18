@@ -350,9 +350,14 @@
   padding: 4px 10px 4px 9px;
   border-radius: 999px;
   overflow: hidden;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--c) 26%, transparent), rgba(255, 255, 255, 0.03));
-  border: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
-  color: color-mix(in srgb, var(--c) 45%, #fff);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--c) 42%, transparent),
+    color-mix(in srgb, var(--c2) 34%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--c) 60%, var(--c2));
+  color: #ffffff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
   font-family: var(--font-mono);
   font-size: 0.74rem;
   font-weight: 600;
@@ -364,8 +369,8 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--c);
-  box-shadow: 0 0 8px var(--c), 0 0 2px #fff;
+  background: linear-gradient(135deg, var(--c), var(--c2));
+  box-shadow: 0 0 10px var(--c), 0 0 4px var(--c2);
   flex: none;
 }
 
@@ -379,7 +384,7 @@
   background: linear-gradient(
     100deg,
     transparent,
-    color-mix(in srgb, var(--c) 75%, #fff),
+    var(--c2),
     transparent
   );
   transform: skewX(-20deg);
