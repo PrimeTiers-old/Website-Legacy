@@ -105,7 +105,11 @@ export function setupRankings() {
   });
 
   window.addEventListener("resize", syncSlider);
-  root.querySelector(".pill-row").addEventListener("scroll", syncSlider, { passive: true });
+  const track = root.querySelector(".pill-row");
+  track.addEventListener("scroll", syncSlider, { passive: true });
+  // The leaderboard starts hidden, so the row measures 0 wide when first rendered.
+  // Re-check whenever it gets a real size (e.g. when the page is shown).
+  if ("ResizeObserver" in window) new ResizeObserver(syncSlider).observe(track);
 
   // Keeps the leaderboard search in sync with the header search (#/leaderboard?q=name).
   window.addEventListener("pt:search", (e) => {
