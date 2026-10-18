@@ -1,5 +1,5 @@
 import { GAMEMODES, REGIONS, REGION_ACCENTS, REGION_COLORS, TIER_COLORS, TIER_ORDER } from "../data.js";
-import { PLAYERS } from "../data/players.js";
+import { PLAYERS, loadPlayers } from "../data/players.js";
 import { defaultSkin, hydrateHeads } from "./heads.js";
 import { createSelect } from "./select.js";
 
@@ -115,6 +115,10 @@ export function setupRankings() {
   });
 
   renderTable();
+  // Fill the table once the API data arrives.
+  loadPlayers().then((ok) => {
+    if (ok) renderTable();
+  });
 }
 
 const GRID_ICON = `<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="11" y="3" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="3" y="11" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="11" y="11" width="6" height="6" rx="1.5" fill="currentColor"/></svg>`;

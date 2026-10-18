@@ -3,6 +3,8 @@
 
 export const DISCORD_URL = "https://discord.gg/primetiers";
 export const SERVER_IP = "Primetiers.net";
+// PrimeTiers API (Cloudflare Worker). Used for the live leaderboard.
+export const API_BASE = "https://api.primetiers.net";
 export const GUILD_ID = "1498238605179748413";
 
 // Gamemodes supported by PrimeTiers.
