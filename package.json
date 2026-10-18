@@ -4,8 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "data": "node scripts/build-data.mjs",
+    "dev": "npm run data && vite",
+    "build": "node scripts/build-data.mjs && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler pages deploy dist --project-name primetiers"
   },

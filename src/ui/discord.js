@@ -1,7 +1,6 @@
 import { GUILD_ID } from "../data.js";
 
-// Reads the public Discord widget JSON for the live online count.
-// Fails quietly and keeps the default label if the request is blocked.
+// Live Discord online count from the public widget. Keeps the default label if it is blocked.
 export async function loadOnlineCount() {
   const value = document.getElementById("online");
   if (!value) return;
