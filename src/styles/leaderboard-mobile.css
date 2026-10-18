@@ -1,0 +1,141 @@
+/* Leaderboard on phones: each player becomes a stacked card instead of a
+   wide table that has to be scrolled sideways. Desktop styles are unchanged.
+   Loaded last (see index.css) so these rules win the cascade. */
+
+@media (max-width: 760px) {
+  .table-wrap {
+    overflow: visible;
+    background: none;
+    border: none;
+    border-radius: 0;
+    backdrop-filter: none;
+  }
+
+  .rankings-table {
+    display: block;
+    min-width: 0;
+  }
+
+  /* Column headings are not needed when every card labels its own parts.
+     Hidden visually but kept for screen readers. */
+  .rankings-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .rankings-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .rankings-table tbody tr {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 12px;
+    padding: 14px 14px 14px 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left-width: 3px;
+    border-radius: var(--radius-lg);
+  }
+
+  .rankings-table tbody tr:hover {
+    background: var(--surface);
+  }
+
+  .rankings-table td {
+    display: block;
+    padding: 0;
+    border: none;
+  }
+
+  .col-rank {
+    grid-column: 1;
+    grid-row: 1;
+    width: auto;
+    min-width: 2.5ch;
+    font-size: 1rem;
+  }
+
+  .col-player {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .col-region {
+    grid-column: 3;
+    grid-row: 1;
+    width: auto;
+  }
+
+  .col-tiers {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0;
+    width: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  .player {
+    gap: 10px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .player-meta {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .player-name {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 1.02rem;
+  }
+
+  .head,
+  .head img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .region {
+    font-size: 0.78rem;
+    padding: 4px 9px 4px 8px;
+  }
+
+  .tier-chips {
+    gap: 6px;
+  }
+
+  .tier-chip {
+    gap: 6px;
+    padding: 3px 8px 3px 3px;
+    font-size: 0.86rem;
+  }
+
+  .tier-chip img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .chip-tier {
+    font-size: 0.8rem;
+    padding: 2px 8px;
+  }
+
+  .rankings-table tbody tr > .empty {
+    grid-column: 1 / -1;
+    padding: 24px 8px;
+  }
+}
