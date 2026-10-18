@@ -1,35 +1,57 @@
-// SAMPLE DATA. These entries are placeholders so the leaderboard has
-// something to show. Replace this array with real results before launch.
+// Live leaderboard data from the PrimeTiers API (Cloudflare Worker, see API repo).
 //
-// One record per player:
-//   name    Minecraft username (premium and cracked names both work)
+// PLAYERS is filled by loadPlayers(). Each record:
+//   name    Minecraft username
 //   region  one of REGIONS in data.js
-//   role    one of ROLES in data.js (Owner, Admin, Senior Tester, Tester, Member)
 //   tiers   gamemode slug (from GAMEMODES in data.js) -> tier (HT1..LT5)
+//
+// Gamemode slugs match the API: nethertite and mace-spear.
 
-export const PLAYERS = [
-  {
-    name: "burnet01",
-    region: "NA",
-    role: "Owner",
-    tiers: {
-      crystal: "HT1",
-      axe: "LT1",
-      sword: "HT2",
-      mace: "LT2",
-      nethertite: "HT3",
-      pot: "LT3",
-      smp: "HT4",
-      uhc: "LT4",
-      cart: "HT5",
-      "mace-spear": "LT5",
-    },
-  },
-  { name: "SampleTwo", region: "EU", role: "Senior Tester", tiers: { sword: "HT1", mace: "LT2" } },
-  { name: "SampleThree", region: "NA", role: "Tester", tiers: { axe: "LT1", pot: "HT3", smp: "LT3" } },
-  { name: "SampleFour", region: "AS", role: "Admin", tiers: { uhc: "HT2", cart: "LT2" } },
-  { name: "SampleFive", region: "EU", role: "Member", tiers: { crystal: "LT2", "mace-spear": "HT1", nethertite: "HT4" } },
-  { name: "SampleSix", region: "SA", role: "Tester", tiers: { mace: "HT3", axe: "LT4" } },
-  { name: "SampleSeven", region: "NA", role: "Member", tiers: { pot: "LT3", smp: "HT4", sword: "LT5" } },
-  { name: "SampleEight", region: "AU", role: "Senior Tester", tiers: { smp: "HT2", uhc: "HT4", crystal: "LT4", cart: "HT5" } },
-];
+import { API_BASE } from "../data.js";
+
+export const PLAYERS = [];
+
+// The leaderboard is cached in this browser for 5 minutes. Visitors share the
+// API's edge cache too, so Supabase sees roughly one request per region per 5 minutes.
+const CACHE_KEY = "pt:leaderboard:v1";
+const CACHE_MS = 5 * 60 * 1000;
+
+function readCache() {
+  try {
+    const hit = JSON.parse(localStorage.getItem(CACHE_KEY));
+    return hit && Date.now() - hit.at < CACHE_MS ? hit.items : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(items) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), items }));
+  } catch {
+    // Storage full or blocked. The page still works without the cache.
+  }
+}
+
+// Loads every ranked player in one request. Resolves to true when loaded.
+export async function loadPlayers() {
+  try {
+    let items = readCache();
+    if (!items) {
+      const res = await fetch(`${API_BASE}/api/leaderboard/global?limit=500`);
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      items = (await res.json()).items;
+      writeCache(items);
+    }
+    const players = items.map((item) => ({
+      name: item.username,
+      region: item.region,
+      tiers: Object.fromEntries(item.tiers.map((t) => [t.gamemode, t.tier])),
+    }));
+    PLAYERS.splice(0, PLAYERS.length, ...players);
+    return true;
+  } catch (err) {
+    console.error("Could not load leaderboard:", err);
+    return false;
+  }
+}
