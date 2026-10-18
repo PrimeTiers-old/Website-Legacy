@@ -1,4 +1,30 @@
-node_modules
-dist
-.wrangler
-/RyftTiers
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.wrangler/
+
+# Local environment and secrets (never commit API keys)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs and caches
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.cache/
+.vite/
+*.tsbuildinfo
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
