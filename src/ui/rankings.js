@@ -48,7 +48,7 @@ export function setupRankings() {
       value: "all",
       options: [
         { value: "all", label: "All regions" },
-        ...REGIONS.map((r) => ({ value: r, label: r, color: REGION_COLORS[r] })),
+        ...REGIONS.map((r) => ({ value: r, label: r, color: REGION_COLORS[r], accent: REGION_ACCENTS[r], pill: true })),
       ],
       onChange: (v) => {
         state.region = v;

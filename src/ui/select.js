@@ -40,13 +40,15 @@ export function createSelect({ label, options, value, onChange }) {
     text.textContent = sel.label;
     // Pill options (tiers) fill the whole button with their colour when selected.
     btn.classList.toggle("is-pill", Boolean(sel.pill && sel.color));
+    btn.classList.toggle("is-region", Boolean(sel.accent));
     btn.style.setProperty("--c", sel.color ?? "");
+    btn.style.setProperty("--c2", sel.accent ?? sel.color ?? "");
     dot.setAttribute("style", dotStyle(sel.color));
     menu.innerHTML = options
       .map(
         (o) => `
         <li role="option" tabindex="-1" data-value="${o.value}" aria-selected="${o.value === current}"
-            class="pt-select-option${o.value === current ? " is-selected" : ""}${o.pill ? " is-pill" : ""}" style="${o.pill && o.color ? `--c:${o.color}` : ""}">
+            class="pt-select-option${o.value === current ? " is-selected" : ""}${o.pill ? " is-pill" : ""}${o.accent ? " is-region" : ""}" style="${o.pill && o.color ? `--c:${o.color};--c2:${o.accent ?? o.color}` : ""}">
           <span class="pt-select-dot" style="${dotStyle(o.color)}"></span>${o.label}
         </li>`
       )

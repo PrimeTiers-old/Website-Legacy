@@ -688,3 +688,73 @@
   filter: brightness(1.1);
   background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 45%, #ffffff));
 }
+
+/* Region filter: same two-flag gradient as the region tags on the leaderboard */
+
+.pt-select-btn.is-region {
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--c) 42%, transparent),
+    color-mix(in srgb, var(--c2) 34%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--c) 60%, var(--c2));
+  color: #ffffff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  box-shadow: none;
+}
+
+.pt-select-btn.is-region .pt-select-dot {
+  background: linear-gradient(135deg, var(--c), var(--c2)) !important;
+  box-shadow: 0 0 10px var(--c), 0 0 4px var(--c2);
+}
+
+.pt-select-btn.is-region .pt-select-caret {
+  color: #ffffff;
+}
+
+.pt-select-option.is-region {
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--c) 42%, transparent),
+    color-mix(in srgb, var(--c2) 34%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--c) 60%, var(--c2));
+  color: #ffffff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.pt-select-option.is-region .pt-select-dot {
+  background: linear-gradient(135deg, var(--c), var(--c2)) !important;
+  box-shadow: 0 0 10px var(--c), 0 0 4px var(--c2);
+}
+
+.pt-select-option.is-region:hover,
+.pt-select-option.is-region:focus-visible,
+.pt-select-option.is-region.is-selected {
+  filter: brightness(1.15);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--c) 42%, transparent),
+    color-mix(in srgb, var(--c2) 34%, transparent)
+  );
+  color: #ffffff;
+}
+
+/* Gamemode buttons: icon and label centred on one line */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  line-height: 1;
+}
+
+.pill img,
+.pill svg {
+  display: block;
+  flex: none;
+  object-fit: contain;
+}
