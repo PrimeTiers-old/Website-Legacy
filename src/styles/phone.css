@@ -1,0 +1,212 @@
+/* Phone layout pass (up to 640px wide). Desktop styles are unchanged.
+   Loaded last (see index.css). */
+
+/* Full-bleed hero art is wider than a phone. iOS ignores body overflow-x,
+   so clip it on the root element to stop sideways panning. */
+html {
+  overflow-x: clip;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 0.97rem;
+  }
+
+  /* Header: tighter bar, search takes the full width under the brand */
+  .header-inner {
+    padding: 10px var(--gutter);
+    gap: 10px;
+  }
+
+  .brand {
+    font-size: 0.92rem;
+  }
+
+  .tab {
+    font-size: 0.8rem;
+    padding: 7px 8px;
+  }
+
+  /* Home hero */
+  .hero {
+    padding-top: 40px;
+    padding-bottom: 36px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 9.4vw, 2.6rem);
+    line-height: 1.05;
+    overflow-wrap: break-word;
+  }
+
+  .lead {
+    font-size: 0.98rem;
+    margin-top: 16px;
+  }
+
+  .hero-actions {
+    margin-top: 24px;
+  }
+
+  .hero-actions .btn {
+    flex: 1 1 100%;
+  }
+
+  .hero-logo {
+    width: min(70%, 260px);
+  }
+
+  .stats {
+    margin-top: 32px;
+  }
+
+  .stat + .stat {
+    padding-left: 12px;
+  }
+
+  .stat-value {
+    font-size: 1.15rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+  }
+
+  /* Gamemode cards: two compact columns, the featured one spans both */
+  .modes {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .mode-wide {
+    grid-column: span 2;
+  }
+
+  .mode {
+    gap: 12px;
+    padding: 14px;
+    min-height: 0;
+  }
+
+  .mode-icon {
+    width: 46px;
+    height: 46px;
+    padding: 6px;
+    border-radius: 13px;
+  }
+
+  .mode-name {
+    font-size: 1rem;
+  }
+
+  .mode-wide .mode-name {
+    font-size: 1.35rem;
+  }
+
+  .mode-cta {
+    font-size: 0.8rem;
+  }
+
+  /* Leaderboard: less dead space above the filters */
+  .rankings {
+    padding-top: 28px;
+  }
+
+  /* Shared sections */
+  .section {
+    padding-top: 56px;
+  }
+
+  .section-head {
+    margin-bottom: 24px;
+  }
+
+  .section-head h2,
+  .community-copy h2,
+  .cta h2 {
+    font-size: 1.7rem;
+  }
+
+  /* Leaderboard: gamemode slider scaled down from desktop size */
+  .mode-slider {
+    gap: 6px;
+  }
+
+  .mode-slider .pill-row {
+    padding: 4px 22px;
+    gap: 8px;
+  }
+
+  .mode-slider .pill {
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    gap: 8px;
+  }
+
+  .mode-slider .pill img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .mode-slider .pill.pill-all svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mode-slider .slider-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .mode-slider .slider-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Leaderboard filters: full-width stacked controls */
+  .filter-row {
+    gap: 8px;
+  }
+
+  .filter-slot {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+  }
+
+  .search-wrap {
+    flex: 1 1 100%;
+  }
+
+  .search-wrap input {
+    height: 46px;
+    font-size: 0.98rem;
+  }
+
+  /* Count and Discord button: stack, button full width */
+  .table-meta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    font-size: 0.9rem;
+  }
+
+  .table-meta .join-discord {
+    justify-content: center;
+  }
+}
+
+/* Very small phones (iPhone SE and similar) */
+@media (max-width: 380px) {
+  .hero h1 {
+    font-size: 1.85rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .tab {
+    padding: 6px 6px;
+    font-size: 0.76rem;
+  }
+}
