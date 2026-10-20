@@ -44,6 +44,7 @@ function apply(items) {
     .filter((item) => item && typeof item.username === "string" && Array.isArray(item.tiers))
     .map((item) => ({
       name: item.username,
+      points: Number(item.points) || 0,
       region: item.region,
       tiers: Object.fromEntries(item.tiers.map((t) => [t.gamemode, t.tier])),
     }));

@@ -169,10 +169,19 @@ function filteredPlayers() {
       if (state.query && !player.name.toLowerCase().includes(state.query)) return false;
       return true;
     })
-    .sort(
-      (a, b) =>
+    .sort((a, b) => {
+      // All gamemodes: the API's total points decide the order, same as the global leaderboard.
+      // A single gamemode: order by that gamemode's best tier.
+      if (state.mode === "all") {
+        return (
+          b.player.points - a.player.points ||
+          a.player.name.toLowerCase().localeCompare(b.player.name.toLowerCase())
+        );
+      }
+      return (
         rank(a.tiers[0][1]) - rank(b.tiers[0][1]) || a.player.name.localeCompare(b.player.name)
-    );
+      );
+    });
 }
 
 function renderTable() {
