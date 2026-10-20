@@ -13,7 +13,7 @@ export const GAMEMODES = [
   { slug: "axe", name: "Axe" },
   { slug: "sword", name: "Sword" },
   { slug: "mace", name: "Mace" },
-  { slug: "nethertite", name: "Nethertite" },
+  { slug: "nethertite", name: "Netherite" },
   { slug: "pot", name: "Pot" },
   { slug: "smp", name: "SMP" },
   { slug: "uhc", name: "UHC" },

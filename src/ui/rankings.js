@@ -104,6 +104,21 @@ export function setupRankings() {
     }, 0);
   });
 
+  // If the first load failed (e.g. flaky mobile connection), retry when the leaderboard is opened
+  // or the tab becomes visible again, instead of leaving the table empty until a reload.
+  const retryIfEmpty = () => {
+    if (PLAYERS.length > 0) return;
+    loadPlayers().then((ok) => {
+      if (ok) renderTable();
+    });
+  };
+  window.addEventListener("hashchange", () => {
+    if (window.location.hash.startsWith("#/leaderboard")) retryIfEmpty();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") retryIfEmpty();
+  });
+
   window.addEventListener("resize", syncSlider);
   const track = root.querySelector(".pill-row");
   track.addEventListener("scroll", syncSlider, { passive: true });
