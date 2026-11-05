@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Network Test · PrimeTiers</title>
-    <meta name="description" content="Help PrimeTiers pick better server locations by testing your connection." />
-    <meta name="robots" content="noindex" />
+    <meta name="description" content="Test your connection to popular hosting services and help PrimeTiers find the best one for players." />
     <meta name="theme-color" content="#06050b" />
     <link rel="icon" href="/images/icon.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,20 +23,24 @@
 
       <h1>Network test</h1>
       <p class="net-lead">
-        Some players reach our server through Singapore instead of a direct route. This page checks how fast you
-        reach a few possible server locations and sends the results to us automatically. Keep it open for a few
-        seconds.
+        Help us find the best hosting for players. This page checks how fast you reach each hosting service, then
+        sends us the results automatically. Keep it open for a few seconds.
       </p>
       <p class="net-warn" id="net-relay" hidden>
-        You seem to be on a VPN, Cloudflare WARP or iCloud Private Relay, so these numbers don't show your real
-        route. Turn it off and reload this page.
+        It looks like you're using a VPN or a privacy relay, so these results may not match your normal connection.
+        Turn it off and reload this page.
       </p>
 
       <section class="net-card" aria-labelledby="auto-title">
         <h2 id="auto-title">Your results</h2>
-        <div class="net-groups" id="net-auto"></div>
+        <ul class="net-list" id="net-auto"></ul>
         <p class="net-status" id="net-status" role="status" aria-live="polite">Starting test…</p>
       </section>
+
+      <p class="net-privacy">
+        This test also checks regional network servers. We save the results with your IP address, internet provider and
+        approximate location.
+      </p>
 
       <section class="net-card" id="net-extra" aria-labelledby="extra-title" hidden>
         <h2 id="extra-title">Want to help more? (optional)</h2>

@@ -33,7 +33,6 @@ const ASIA = [
     // Cloud Run answers at Google's nearest edge, then crosses Google's own
     // network to the region, the same path a Premium Tier VM would get.
     name: "Google Cloud",
-    note: "via Google's network",
     targets: [
       { id: "gcp-bom", label: "Mumbai", url: "https://asia-south1-5tkroniexa-el.a.run.app/api/ping" },
       { id: "gcp-del", label: "Delhi", url: "https://asia-south2-5tkroniexa-em.a.run.app/api/ping" },
@@ -69,7 +68,6 @@ const ASIA = [
     // site pings (Mumbai node on OVH, Singapore on Oracle Cloud). The Noida node
     // (ry.cubicloud.in:9000) didn't answer when added, so it's left out.
     name: "CubiCloud",
-    note: "Minecraft, hourly",
     targets: [
       { id: "cubicloud-bom", label: "Mumbai", url: "https://mc.cubicloud.in:9090/" },
       { id: "cubicloud-sgp", label: "Singapore", url: "https://sg1.cubicloud.in:8080/" },
@@ -79,7 +77,6 @@ const ASIA = [
     // WiseHosting's own ping server (from its location finder). It has no
     // India location; Singapore is the nearest.
     name: "WiseHosting",
-    note: "Minecraft",
     targets: [{ id: "wisehosting-sgp", label: "Singapore", url: "https://sg.ping.wisehosting.com:444/" }],
   },
   {
@@ -89,7 +86,7 @@ const ASIA = [
     // carrier networks in each city, so they show how well the player reaches
     // a server hosted in that city.
     name: "Pakistan",
-    note: "carrier test servers",
+    hidden: true, // carrier servers, not a hosting service: saved, not shown
     targets: [
       { id: "pk-khi-ptcl", label: "Karachi (PTCL)", url: "https://speedtest3.ptcl.net.prod.hosts.ooklaserver.net:8080/hello", method: "GET", cors: true },
       { id: "pk-khi-cyber", label: "Karachi (Cybernet)", url: "https://karachi-speedtest.cyber.net.pk.prod.hosts.ooklaserver.net:8080/hello", method: "GET" },
@@ -154,7 +151,6 @@ const EUROPE = [
   },
   {
     name: "Google Cloud",
-    note: "via Google's network",
     targets: [
       { id: "gcp-fra", label: "Frankfurt", url: "https://europe-west3-5tkroniexa-ey.a.run.app/api/ping" },
       { id: "gcp-lon", label: "London", url: "https://europe-west2-5tkroniexa-nw.a.run.app/api/ping" },
@@ -172,7 +168,6 @@ const EUROPE = [
   },
   {
     name: "PowerupStack",
-    note: "on OVH's network",
     targets: [
       { id: "powerupstack-rbx", label: "Roubaix", url: "https://eu-west-rbx01.powerupstack.com/v1/ping", method: "GET" },
       { id: "powerupstack-fra", label: "Frankfurt", url: "https://lim01.powerupstack.net/v1/ping", method: "GET" },
@@ -181,7 +176,6 @@ const EUROPE = [
   },
   {
     name: "WiseHosting",
-    note: "Minecraft",
     targets: [
       { id: "wisehosting-fra", label: "Frankfurt", url: "https://de.ping.wisehosting.com:444/" },
       { id: "wisehosting-lon", label: "London", url: "https://uk.ping.wisehosting.com:444/" },
@@ -220,7 +214,6 @@ const SECTIONS = [
     // rows show how much routing varies; only a real Spectrum app measures
     // Spectrum. Every row records which colo answered.
     name: "Cloudflare",
-    note: "HTTP edge, not Spectrum",
     targets: [
       { id: "cloudflare-edge", label: "This site (Free plan)", url: "/cdn-cgi/trace", method: "GET", readColo: true },
       { id: "cloudflare-speed", label: "speed.cloudflare.com", url: "https://speed.cloudflare.com/cdn-cgi/trace", method: "GET", cors: true, readColo: true },
@@ -231,14 +224,12 @@ const SECTIONS = [
     // Minecraft proxy, anycast (AS64199): each player reaches the nearest node.
     // Its edges only speak Minecraft, so this is a TCP probe (see tcpProbe).
     name: "TCPShield",
-    note: "Minecraft proxy, anycast",
     targets: [{ id: "tcpshield-edge", label: "Nearest edge", url: "https://104.234.6.1:25565/", tcpProbe: true }],
   },
   {
     // NeoProtect GameShield (AS199414). Its anycast address is only given out
     // in the customer panel; this public edge is in Frankfurt.
     name: "NeoProtect",
-    note: "Minecraft proxy",
     targets: [{ id: "neoprotect-fra", label: "Frankfurt edge", url: "https://82.22.5.100:25565/", tcpProbe: true }],
   },
   {
@@ -246,7 +237,6 @@ const SECTIONS = [
     // to Modal enters in Virginia (us-east) unless an app sets routing_region,
     // so this is Modal's default entry point.
     name: "Modal",
-    note: "default entry point, US East",
     targets: [{ id: "modal-use", label: "Virginia (us-east)", url: "https://api.modal.com/" }],
   },
   ] },
@@ -262,69 +252,54 @@ const TIMEOUT_MS = 4000;
 const $ = (id) => document.getElementById(id);
 const status = $("net-status");
 
-// One collapsible section per provider. The summary line shows the provider's
-// best location, so players don't need to open anything.
-for (const sec of SECTIONS) {
-  if (sec.name) {
-    const h = document.createElement("h3");
-    h.className = "net-section";
-    h.textContent = sec.name;
-    $("net-auto").append(h);
-  }
-  for (const g of sec.groups) renderGroup(g);
+// Players see one row per hosting service: its best ping across every location.
+// Cities and the per-location numbers are only saved with the report.
+const SERVICES = new Map();
+for (const g of GROUPS) {
+  if (g.hidden) continue;
+  if (!SERVICES.has(g.name)) SERVICES.set(g.name, { name: g.name, targets: [], done: 0 });
+  const service = SERVICES.get(g.name);
+  service.targets.push(...g.targets);
+  for (const t of g.targets) t.service = service;
 }
 
-function renderGroup(g) {
-  const box = document.createElement("details");
-  box.className = "net-group";
-  box.innerHTML = `<summary><span class="net-group-name"></span><span class="net-group-best mono">waiting</span></summary><ul class="net-list"></ul>`;
-  const name = box.querySelector(".net-group-name");
-  name.textContent = g.name;
-  if (g.note) {
-    const note = document.createElement("small");
-    note.textContent = g.note;
-    name.append(" ", note);
-  }
-  g.best = box.querySelector(".net-group-best");
-  g.done = 0;
-  for (const t of g.targets) {
-    const li = document.createElement("li");
-    li.innerHTML = `<span class="net-name"></span><span class="net-bar"><i></i></span><span class="net-ms mono">waiting</span>`;
-    li.querySelector(".net-name").textContent = t.label;
-    t.el = li;
-    t.group = g;
-    box.querySelector("ul").append(li);
-  }
-  $("net-auto").append(box);
+for (const service of SERVICES.values()) {
+  const li = document.createElement("li");
+  li.innerHTML = `<span class="net-name"></span><span class="net-bar"><i></i></span><span class="net-ms mono">Testing…</span>`;
+  li.querySelector(".net-name").textContent = service.name;
+  service.el = li;
+  $("net-auto").append(li);
 }
 
 function grade(ms) {
-  return ms == null ? "bad" : ms < 80 ? "good" : ms < 160 ? "ok" : "bad";
+  return ms < 80 ? "good" : ms < 160 ? "ok" : "bad";
 }
 
-// Called when one of the group's targets finishes.
-function updateGroup(g) {
-  g.done++;
-  const ok = g.targets.filter((t) => t.ms != null);
-  if (g.done < g.targets.length) {
-    g.best.textContent = `testing ${g.done}/${g.targets.length}…`;
-    return;
-  }
-  if (!ok.length) {
-    g.best.textContent = "failed";
-    g.best.dataset.grade = "bad";
-    return;
-  }
-  const best = ok.reduce((a, b) => (b.ms < a.ms ? b : a));
-  g.best.textContent =
-    g.targets.length > 1 || best.readColo ? `best ${Math.round(best.ms)} ms · ${best.label}` : `${Math.round(best.ms)} ms`;
-  g.best.dataset.grade = grade(best.ms);
+function bestMs(service) {
+  const times = service.targets.map((t) => t.ms).filter((ms) => ms != null);
+  return times.length ? Math.min(...times) : null;
 }
 
-function show(t, text, ms) {
-  t.el.querySelector(".net-ms").textContent = text;
-  t.el.querySelector(".net-bar i").style.width = ms == null ? "0" : `${Math.max(4, 100 - Math.min(ms, 400) / 4)}%`;
-  t.el.dataset.grade = grade(ms);
+// Called when one of the service's locations finishes.
+function updateService(service) {
+  service.done++;
+  const ms = bestMs(service);
+  const finished = service.done === service.targets.length;
+  const text = service.el.querySelector(".net-ms");
+  const bar = service.el.querySelector(".net-bar i");
+  if (ms == null) {
+    if (finished) text.textContent = "No response";
+    return;
+  }
+  text.textContent = `${Math.round(ms)} ms${finished ? "" : "…"}`;
+  bar.style.width = `${Math.max(4, 100 - Math.min(ms, 400) / 4)}%`;
+  service.el.dataset.grade = grade(ms);
+}
+
+// Fastest first; services that never answered go last.
+function sortServices() {
+  const order = [...SERVICES.values()].sort((a, b) => (bestMs(a) ?? Infinity) - (bestMs(b) ?? Infinity));
+  for (const service of order) $("net-auto").append(service.el);
 }
 
 // One request (HEAD unless the target sets `method`). Timing, best first:
@@ -417,35 +392,26 @@ async function readColo(url) {
 }
 
 async function measure(t) {
-  show(t, "testing…", null);
   try {
     await once(t); // warm-up: opens the connection (DNS, TCP, TLS), not counted
     const times = [];
     for (let i = 0; i < SAMPLES; i++) {
       times.push(await once(t));
-      show(t, `${Math.round(Math.min(...times))} ms…`, Math.min(...times));
     }
     // Display only; the API computes median/min/max/jitter from the raw samples.
     const sorted = [...times].sort((a, b) => a - b);
-    const ms = sorted[Math.floor(sorted.length / 2)];
-    show(t, `${Math.round(ms)} ms`, ms);
-    t.ms = ms;
+    t.ms = sorted[Math.floor(sorted.length / 2)];
     const result = { id: t.id, samples: times }; // in the order taken, for jitter
     if (t.readColo) {
       const colo = await readColo(t.url);
-      if (colo) {
-        result.colo = colo;
-        t.label = `${t.label} (${colo})`;
-        t.el.querySelector(".net-name").textContent = t.label;
-      }
+      if (colo) result.colo = colo;
     }
     return result;
   } catch {
-    show(t, "failed", null);
     t.ms = null;
     return { id: t.id, samples: [] };
   } finally {
-    updateGroup(t.group);
+    if (t.service) updateService(t.service);
   }
 }
 
@@ -456,30 +422,35 @@ async function post(path, payload) {
     body: JSON.stringify(payload),
   });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error ?? `error ${res.status}`);
+  if (!res.ok) throw Object.assign(new Error(body.error ?? `error ${res.status}`), { status: res.status });
   return body;
 }
 
 let token = null;
 
 async function run() {
-  status.textContent = "Testing… keep this page open.";
+  status.textContent = "Testing your connection. Keep this page open for a few seconds.";
   performance.setResourceTimingBufferSize?.(500);
   // Every host at once (each is a different server, so they don't share a
   // connection). Each host's own samples stay sequential on one open
   // connection, so every sample is a single round trip. All results go to
   // the API in one request below.
   const results = await Promise.all(TARGETS.map(measure));
+  sortServices();
 
   status.textContent = "Sending results…";
   try {
     const res = await post("/api/network/report", { results });
     token = res.token;
     if (res.relay) $("net-relay").hidden = false;
-    status.textContent = "Done. Your results were sent. Thanks!";
-    $("net-extra").hidden = false;
+    status.textContent = "All done. Thanks for helping!";
+    // Only for players staff ask to send a route: /network?trace
+    if (new URLSearchParams(location.search).has("trace")) $("net-extra").hidden = false;
   } catch (e) {
-    status.textContent = `Couldn't send your results (${e.message}). Reload the page to try again.`;
+    status.textContent =
+      e.status === 429
+        ? "Thanks! We already have your results from the last minute."
+        : "We couldn't send your results. Reload the page to try again.";
   }
 }
 
