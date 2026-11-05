@@ -80,22 +80,6 @@ const ASIA = [
     targets: [{ id: "wisehosting-sgp", label: "Singapore", url: "https://sg.ping.wisehosting.com:444/" }],
   },
   {
-    // Hourly-billed Pakistan hosts (LightNode Karachi, Zenlayer Karachi,
-    // LiteKeep Islamabad, ...) only publish ping-only test IPs, which a browser
-    // can't reach. These are Ookla Speedtest servers on the main Pakistani
-    // carrier networks in each city, so they show how well the player reaches
-    // a server hosted in that city.
-    name: "Pakistan",
-    hidden: true, // carrier servers, not a hosting service: saved, not shown
-    targets: [
-      { id: "pk-khi-ptcl", label: "Karachi (PTCL)", url: "https://speedtest3.ptcl.net.prod.hosts.ooklaserver.net:8080/hello", method: "GET", cors: true },
-      { id: "pk-khi-cyber", label: "Karachi (Cybernet)", url: "https://karachi-speedtest.cyber.net.pk.prod.hosts.ooklaserver.net:8080/hello", method: "GET" },
-      { id: "pk-lhe-tes", label: "Lahore (Transworld)", url: "https://speedtestlhr.tes.com.pk:8080/hello", method: "GET" },
-      { id: "pk-isb-tes", label: "Islamabad (Transworld)", url: "https://speedtestisb.tes.com.pk:8080/hello", method: "GET" },
-      { id: "pk-isb-nayatel", label: "Islamabad (Nayatel)", url: "https://speedtest.nayatel.com:8080/hello", method: "GET" },
-    ],
-  },
-  {
     // Hetzner's official Singapore test site. It drops HEAD requests and any
     // request with a query string, so it's a plain GET of the 323-byte index.
     name: "Hetzner Cloud",
@@ -256,7 +240,7 @@ const status = $("net-status");
 // Cities and the per-location numbers are only saved with the report.
 const SERVICES = new Map();
 for (const g of GROUPS) {
-  if (g.hidden) continue;
+  for (const t of g.targets) t.provider = g.name; // saved with each result
   if (!SERVICES.has(g.name)) SERVICES.set(g.name, { name: g.name, targets: [], done: 0 });
   const service = SERVICES.get(g.name);
   service.targets.push(...g.targets);
@@ -313,7 +297,7 @@ function sortServices() {
 //   noQuery  don't add a cache-busting ?t= (Hetzner drops any request with a
 //            query string); cache: "no-store" still bypasses the browser cache
 //   cors     real CORS request without cookies, for servers that allow our
-//            origin (only PTCL's Ookla server does).
+//            origin (Cloudflare's trace endpoints).
 // Every request is sent without a Referer: Hetzner drops requests that have one.
 // For servers that only speak Minecraft (TCPShield, NeoProtect): the browser
 // opens a TCP connection (1 round trip), sends a TLS hello, and the proxy
@@ -401,7 +385,7 @@ async function measure(t) {
     // Display only; the API computes median/min/max/jitter from the raw samples.
     const sorted = [...times].sort((a, b) => a - b);
     t.ms = sorted[Math.floor(sorted.length / 2)];
-    const result = { id: t.id, samples: times }; // in the order taken, for jitter
+    const result = { id: t.id, provider: t.provider, location: t.label, samples: times }; // samples in the order taken, for jitter
     if (t.readColo) {
       const colo = await readColo(t.url);
       if (colo) result.colo = colo;
@@ -409,7 +393,7 @@ async function measure(t) {
     return result;
   } catch {
     t.ms = null;
-    return { id: t.id, samples: [] };
+    return { id: t.id, provider: t.provider, location: t.label, samples: [] };
   } finally {
     if (t.service) updateService(t.service);
   }
