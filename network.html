@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Network Test · PrimeTiers</title>
+    <meta name="description" content="Help PrimeTiers pick better server locations by testing your connection." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#06050b" />
+    <link rel="icon" href="/images/icon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Lexend:wght@300;400;500;600&family=JetBrains+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="net">
+      <a class="net-back" href="/">
+        <img src="/images/icon.png" alt="" width="28" height="28" />
+        PrimeTiers
+      </a>
+
+      <h1>Network test</h1>
+      <p class="net-lead">
+        Some players reach our server through Singapore instead of a direct route. This test checks how fast you
+        reach a few possible server locations. It takes about 20 seconds. Then send us the results.
+      </p>
+
+      <section class="net-card" aria-labelledby="auto-title">
+        <div class="net-card-head">
+          <h2 id="auto-title">1. Browser test</h2>
+          <button class="btn btn-primary" type="button" id="net-run">Start test</button>
+        </div>
+        <ul class="net-list" id="net-auto"></ul>
+      </section>
+
+      <section class="net-card" aria-labelledby="manual-title">
+        <h2 id="manual-title">2. Karachi test (optional)</h2>
+        <p>
+          The browser can't reach LightNode Karachi, so you have to run this one yourself. Open Command Prompt
+          (Windows key, type <span class="mono">cmd</span>, press Enter) and run:
+        </p>
+        <div class="net-cmd">
+          <code class="mono" id="cmd-ping">ping -n 10 38.60.217.49</code>
+          <button class="btn btn-glass btn-sm" type="button" data-copy="cmd-ping">Copy</button>
+        </div>
+        <label class="net-field">
+          <span>Paste the <b>Average</b> number from the last line (ms)</span>
+          <input type="number" id="net-khi" min="0" max="10000" step="1" inputmode="numeric" placeholder="e.g. 85" />
+        </label>
+      </section>
+
+      <section class="net-card" aria-labelledby="trace-title">
+        <h2 id="trace-title">3. Route to our server (optional)</h2>
+        <p>This shows the path your connection takes to Primetiers.net. It can take a minute to finish.</p>
+        <div class="net-cmd">
+          <code class="mono" id="cmd-trace">tracert primetiers.net</code>
+          <button class="btn btn-glass btn-sm" type="button" data-copy="cmd-trace">Copy</button>
+        </div>
+        <label class="net-field">
+          <span>Paste everything it prints</span>
+          <textarea id="net-trace" rows="6" maxlength="8000" spellcheck="false"></textarea>
+        </label>
+      </section>
+
+      <section class="net-card" aria-labelledby="send-title">
+        <h2 id="send-title">4. Send results</h2>
+        <label class="net-field">
+          <span>Minecraft username (optional)</span>
+          <input type="text" id="net-name" maxlength="32" autocomplete="off" placeholder="Steve" />
+        </label>
+        <button class="btn btn-primary btn-lg" type="button" id="net-send" disabled>Send results</button>
+        <p class="net-status" id="net-status" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script type="module" src="/src/network.js"></script>
+  </body>
+</html>

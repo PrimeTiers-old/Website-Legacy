@@ -1,0 +1,130 @@
+.net {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px var(--gutter) 64px;
+}
+.net-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+}
+.net h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  margin: 28px 0 10px;
+}
+.net-lead {
+  color: var(--text-dim);
+  margin: 0 0 24px;
+}
+.net-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.net-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  margin: 0 0 10px;
+}
+.net-card p {
+  color: var(--text-dim);
+  margin: 0 0 12px;
+}
+.net-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.net-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.net-list li {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 2fr auto;
+  align-items: center;
+  gap: 12px;
+}
+.net-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-hi);
+  overflow: hidden;
+}
+.net-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--violet);
+  transition: width 0.3s var(--ease);
+}
+.net-list li[data-grade="good"] .net-bar i { background: #4ade80; }
+.net-list li[data-grade="ok"] .net-bar i { background: #facc15; }
+.net-list li[data-grade="bad"] .net-bar i { background: #f87171; }
+.net-ms {
+  min-width: 70px;
+  text-align: right;
+}
+.net-cmd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+.net-cmd code {
+  flex: 1;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.net-field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 0.92rem;
+  color: var(--text-dim);
+}
+.net-field input,
+.net-field textarea {
+  font: inherit;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 10px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.net-field textarea {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  resize: vertical;
+}
+.net-status {
+  margin: 12px 0 0;
+  min-height: 1.4em;
+}
+@media (max-width: 520px) {
+  .net-list li {
+    grid-template-columns: 1fr auto;
+  }
+  .net-bar {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}
