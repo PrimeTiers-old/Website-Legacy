@@ -94,9 +94,6 @@ const TARGETS = GROUPS.flatMap((g) => g.targets);
 
 const SAMPLES = 8;
 const TIMEOUT_MS = 4000;
-// Hosts tested at the same time. Each host's own samples stay sequential on
-// one open connection; too many at once would queue on slow connections.
-const PARALLEL = 6;
 
 const $ = (id) => document.getElementById(id);
 const status = $("net-status");
@@ -233,15 +230,11 @@ let token = null;
 async function run() {
   status.textContent = "Testing… keep this page open.";
   performance.setResourceTimingBufferSize?.(500);
-  const results = new Array(TARGETS.length);
-  let next = 0;
-  const worker = async () => {
-    while (next < TARGETS.length) {
-      const i = next++;
-      results[i] = await measure(TARGETS[i]);
-    }
-  };
-  await Promise.all(Array.from({ length: PARALLEL }, worker));
+  // Every host at once (each is a different server, so they don't share a
+  // connection). Each host's own samples stay sequential on one open
+  // connection, so every sample is a single round trip. All results go to
+  // the API in one request below.
+  const results = await Promise.all(TARGETS.map(measure));
 
   status.textContent = "Sending results…";
   try {
