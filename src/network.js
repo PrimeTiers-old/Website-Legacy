@@ -214,12 +214,18 @@ const EUROPE = [
 const SECTIONS = [
   { name: null, groups: [
   {
-    // The Cloudflare data center this player lands on: the first hop for
-    // Spectrum, which would then carry traffic to our server over Cloudflare's
-    // network. Same-origin, so we can read which colo answered.
+    // Cloudflare's HTTP edge. This is NOT Spectrum: a Spectrum app gets its own
+    // IPs, and Cloudflare doesn't announce every plan's IPs at every data center,
+    // so a Free-plan site can land on a farther colo than a paid product. The
+    // rows show how much routing varies; only a real Spectrum app measures
+    // Spectrum. Every row records which colo answered.
     name: "Cloudflare",
-    note: "Spectrum entry point",
-    targets: [{ id: "cloudflare-edge", label: "Nearest edge", url: "/cdn-cgi/trace", method: "GET", readColo: true }],
+    note: "HTTP edge, not Spectrum",
+    targets: [
+      { id: "cloudflare-edge", label: "This site (Free plan)", url: "/cdn-cgi/trace", method: "GET", readColo: true },
+      { id: "cloudflare-speed", label: "speed.cloudflare.com", url: "https://speed.cloudflare.com/cdn-cgi/trace", method: "GET", cors: true, readColo: true },
+      { id: "cloudflare-1111", label: "1.1.1.1", url: "https://1.1.1.1/cdn-cgi/trace", method: "GET", cors: true, readColo: true },
+    ],
   },
   {
     // Minecraft proxy, anycast (AS64199): each player reaches the nearest node.
