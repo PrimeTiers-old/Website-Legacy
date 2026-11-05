@@ -73,6 +73,46 @@ const GROUPS = [
     ],
   },
   {
+    // Pay-by-the-hour Minecraft host. These are its own game nodes, the URLs its
+    // site pings (Mumbai node on OVH, Singapore on Oracle Cloud). The Noida node
+    // (ry.cubicloud.in:9000) didn't answer when added, so it's left out.
+    name: "CubiCloud",
+    note: "Minecraft, hourly",
+    targets: [
+      { id: "cubicloud-bom", label: "Mumbai", url: "https://mc.cubicloud.in:9090/" },
+      { id: "cubicloud-sgp", label: "Singapore", url: "https://sg1.cubicloud.in:8080/" },
+    ],
+  },
+  {
+    // WiseHosting's own ping server (from its location finder). It has no
+    // India location; Singapore is the nearest.
+    name: "WiseHosting",
+    note: "Minecraft",
+    targets: [{ id: "wisehosting-sgp", label: "Singapore", url: "https://sg.ping.wisehosting.com:444/" }],
+  },
+  {
+    // Hourly-billed Pakistan hosts (LightNode Karachi, Zenlayer Karachi,
+    // LiteKeep Islamabad, ...) only publish ping-only test IPs, which a browser
+    // can't reach. These are Ookla Speedtest servers on the main Pakistani
+    // carrier networks in each city, so they show how well the player reaches
+    // a server hosted in that city.
+    name: "Pakistan",
+    note: "carrier test servers",
+    targets: [
+      { id: "pk-khi-ptcl", label: "Karachi (PTCL)", url: "https://speedtest3.ptcl.net.prod.hosts.ooklaserver.net:8080/hello", method: "GET" },
+      { id: "pk-khi-cyber", label: "Karachi (Cybernet)", url: "https://karachi-speedtest.cyber.net.pk.prod.hosts.ooklaserver.net:8080/hello", method: "GET" },
+      { id: "pk-lhe-tes", label: "Lahore (Transworld)", url: "https://speedtestlhr.tes.com.pk:8080/hello", method: "GET" },
+      { id: "pk-isb-tes", label: "Islamabad (Transworld)", url: "https://speedtestisb.tes.com.pk:8080/hello", method: "GET" },
+      { id: "pk-isb-nayatel", label: "Islamabad (Nayatel)", url: "https://speedtest.nayatel.com:8080/hello", method: "GET" },
+    ],
+  },
+  {
+    // Hetzner's official Singapore test site. Couldn't confirm it answers from
+    // a script (it closed the connection); browsers will show "failed" if not.
+    name: "Hetzner Cloud",
+    targets: [{ id: "hetzner-sin", label: "Singapore", url: "https://sin-speed.hetzner.com/100MB.bin" }],
+  },
+  {
     name: "IBM Cloud",
     targets: [
       { id: "ibm-bom", label: "Mumbai", url: "https://s3.in-mum.cloud-object-storage.appdomain.cloud/" },
