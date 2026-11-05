@@ -80,6 +80,20 @@ const ASIA = [
     targets: [{ id: "wisehosting-sgp", label: "Singapore", url: "https://sg.ping.wisehosting.com:444/" }],
   },
   {
+    // Rentable Pakistan host. Its published Lahore test IP has no HTTPS site, but
+    // port 80 accepts a connection and resets the TLS hello, so it can use the
+    // TCP probe. Checked: half the time to failure was ~305 ms against a 292 ms
+    // ping. Other Pakistan hosts' test IPs (LightNode, Zenlayer, OBHost,
+    // AwakeHost) timed out on web ports, so a browser can't test them.
+    name: "Multexpk",
+    targets: [{ id: "multexpk-lhe", label: "Lahore", url: "https://103.159.78.2:80/", tcpProbe: true }],
+  },
+  {
+    // EDIS Global's Dubai looking glass and test file (served from Dubai).
+    name: "EDIS Global",
+    targets: [{ id: "edis-dxb", label: "Dubai", url: "https://ae.edisglobal.com/100MB.test" }],
+  },
+  {
     // Hetzner's official Singapore test site. It drops HEAD requests and any
     // request with a query string, so it's a plain GET of the 323-byte index.
     name: "Hetzner Cloud",
