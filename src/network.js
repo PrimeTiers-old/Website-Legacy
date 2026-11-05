@@ -5,36 +5,139 @@ import "./styles/base.css";
 import "./styles/network.css";
 import { API_BASE } from "./data.js";
 
-// Ids must match TARGETS in API/src/network.rs.
-const TARGETS = [
-  { id: "vultr-blr", label: "Vultr Bangalore", url: "https://blr-in-ping.vultr.com/favicon.ico" },
-  { id: "vultr-del", label: "Vultr Delhi", url: "https://del-in-ping.vultr.com/favicon.ico" },
-  { id: "vultr-bom", label: "Vultr Mumbai", url: "https://bom-in-ping.vultr.com/favicon.ico" },
+// Every URL must be answered instantly by a server in that city, so one
+// request ≈ one network round trip (ping). Each was checked to be a direct,
+// in-region IP whose response time matches its TCP round trip. Don't use pages
+// the server builds per request (Vultr's "/" added ~150 ms).
+// Ids are stored in MongoDB; keep them stable.
+const GROUPS = [
+  {
+    name: "Vultr",
+    targets: [
+      { id: "vultr-blr", label: "Bangalore", url: "https://blr-in-ping.vultr.com/favicon.ico" },
+      { id: "vultr-del", label: "Delhi", url: "https://del-in-ping.vultr.com/favicon.ico" },
+      { id: "vultr-bom", label: "Mumbai", url: "https://bom-in-ping.vultr.com/favicon.ico" },
+      { id: "vultr-sgp", label: "Singapore", url: "https://sgp-ping.vultr.com/favicon.ico" },
+    ],
+  },
+  {
+    name: "Microsoft Azure",
+    targets: [
+      { id: "azure-bom", label: "Mumbai (West India)", url: "https://s3westindia.blob.core.windows.net/public/latency-test.json" },
+      { id: "azure-pnq", label: "Pune (Central India)", url: "https://s3centralindia.blob.core.windows.net/public/latency-test.json" },
+      { id: "azure-maa", label: "Chennai (South India)", url: "https://s3southindia.blob.core.windows.net/public/latency-test.json" },
+      { id: "azure-sgp", label: "Singapore", url: "https://s3southeastasia.blob.core.windows.net/public/latency-test.json" },
+    ],
+  },
+  {
+    // Cloud Run answers at Google's nearest edge, then crosses Google's own
+    // network to the region, the same path a Premium Tier VM would get.
+    name: "Google Cloud",
+    note: "via Google's network",
+    targets: [
+      { id: "gcp-bom", label: "Mumbai", url: "https://asia-south1-5tkroniexa-el.a.run.app/api/ping" },
+      { id: "gcp-del", label: "Delhi", url: "https://asia-south2-5tkroniexa-em.a.run.app/api/ping" },
+      { id: "gcp-sgp", label: "Singapore", url: "https://asia-southeast1-5tkroniexa-as.a.run.app/api/ping" },
+    ],
+  },
+  {
+    name: "Linode (Akamai)",
+    targets: [
+      { id: "linode-bom", label: "Mumbai", url: "https://in-bom-1.linodeobjects.com/" },
+      { id: "linode-maa", label: "Chennai", url: "https://in-maa-1.linodeobjects.com/" },
+      { id: "linode-sgp", label: "Singapore", url: "https://sg-sin-1.linodeobjects.com/" },
+    ],
+  },
+  {
+    name: "OVHcloud",
+    targets: [
+      { id: "ovh-bom", label: "Mumbai", url: "https://bom1-ynm1.speedtest.network.ovh.net/files/1Mb.dat" },
+      { id: "ovh-sgp", label: "Singapore", url: "https://sin1-sgp.speedtest.network.ovh.net/files/1Mb.dat" },
+    ],
+  },
+  {
+    name: "IBM Cloud",
+    targets: [
+      { id: "ibm-bom", label: "Mumbai", url: "https://s3.in-mum.cloud-object-storage.appdomain.cloud/" },
+      { id: "ibm-maa", label: "Chennai", url: "https://s3.che01.cloud-object-storage.appdomain.cloud/" },
+      { id: "ibm-sgp", label: "Singapore", url: "https://s3.sng01.cloud-object-storage.appdomain.cloud/" },
+    ],
+  },
+  {
+    name: "Civo",
+    targets: [{ id: "civo-bom", label: "Mumbai", url: "https://objectstore.mum1.civo.com/" }],
+  },
+  {
+    // Alibaba closed its Mumbai region; Singapore is the nearest.
+    name: "Alibaba Cloud",
+    targets: [{ id: "alibaba-sgp", label: "Singapore", url: "https://oss-ap-southeast-1.aliyuncs.com/" }],
+  },
 ];
-// Each URL is a small static file: the server answers it instantly, so one
-// request ≈ one network round trip (ping). Don't use "/" — Vultr builds that
-// page per request, which added ~150 ms of server time.
+const TARGETS = GROUPS.flatMap((g) => g.targets);
 // LightNode Karachi's test IP (38.60.217.49) only answers ICMP, which browsers
 // can't send, so players can add it by hand after the auto report.
 
 const SAMPLES = 8;
 const TIMEOUT_MS = 4000;
+// Hosts tested at the same time. Each host's own samples stay sequential on
+// one open connection; too many at once would queue on slow connections.
+const PARALLEL = 6;
 
 const $ = (id) => document.getElementById(id);
 const status = $("net-status");
 
-for (const t of TARGETS) {
-  const li = document.createElement("li");
-  li.innerHTML = `<span class="net-name"></span><span class="net-bar"><i></i></span><span class="net-ms mono">waiting</span>`;
-  li.querySelector(".net-name").textContent = t.label;
-  t.el = li;
-  $("net-auto").append(li);
+// One collapsible section per provider. The summary line shows the provider's
+// best location, so players don't need to open anything.
+for (const g of GROUPS) {
+  const box = document.createElement("details");
+  box.className = "net-group";
+  box.innerHTML = `<summary><span class="net-group-name"></span><span class="net-group-best mono">waiting</span></summary><ul class="net-list"></ul>`;
+  const name = box.querySelector(".net-group-name");
+  name.textContent = g.name;
+  if (g.note) {
+    const note = document.createElement("small");
+    note.textContent = g.note;
+    name.append(" ", note);
+  }
+  g.best = box.querySelector(".net-group-best");
+  g.done = 0;
+  for (const t of g.targets) {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="net-name"></span><span class="net-bar"><i></i></span><span class="net-ms mono">waiting</span>`;
+    li.querySelector(".net-name").textContent = t.label;
+    t.el = li;
+    t.group = g;
+    box.querySelector("ul").append(li);
+  }
+  $("net-auto").append(box);
+}
+
+function grade(ms) {
+  return ms == null ? "bad" : ms < 80 ? "good" : ms < 160 ? "ok" : "bad";
+}
+
+// Called when one of the group's targets finishes.
+function updateGroup(g) {
+  g.done++;
+  const ok = g.targets.filter((t) => t.ms != null);
+  if (g.done < g.targets.length) {
+    g.best.textContent = `testing ${g.done}/${g.targets.length}…`;
+    return;
+  }
+  if (!ok.length) {
+    g.best.textContent = "failed";
+    g.best.dataset.grade = "bad";
+    return;
+  }
+  const best = ok.reduce((a, b) => (b.ms < a.ms ? b : a));
+  g.best.textContent = g.targets.length > 1 ? `best ${Math.round(best.ms)} ms · ${best.label}` : `${Math.round(best.ms)} ms`;
+  g.best.dataset.grade = grade(best.ms);
 }
 
 function show(t, text, ms) {
   t.el.querySelector(".net-ms").textContent = text;
   t.el.querySelector(".net-bar i").style.width = ms == null ? "0" : `${Math.max(4, 100 - Math.min(ms, 400) / 4)}%`;
-  t.el.dataset.grade = ms == null ? "bad" : ms < 80 ? "good" : ms < 160 ? "ok" : "bad";
+  t.el.dataset.grade = grade(ms);
 }
 
 // One HEAD request. Uses the browser's own network timing for the request
@@ -67,10 +170,14 @@ async function measure(t) {
     times.sort((a, b) => a - b);
     const ms = times[Math.floor(times.length / 2)];
     show(t, `${Math.round(ms)} ms`, ms);
+    t.ms = ms;
     return { id: t.id, ms, min: times[0], manual: false };
   } catch {
     show(t, "failed", null);
+    t.ms = null;
     return { id: t.id, ms: null, min: null, manual: false };
+  } finally {
+    updateGroup(t.group);
   }
 }
 
@@ -90,8 +197,15 @@ let token = null;
 async function run() {
   status.textContent = "Testing… keep this page open.";
   performance.setResourceTimingBufferSize?.(500);
-  const results = [];
-  for (const t of TARGETS) results.push(await measure(t));
+  const results = new Array(TARGETS.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < TARGETS.length) {
+      const i = next++;
+      results[i] = await measure(TARGETS[i]);
+    }
+  };
+  await Promise.all(Array.from({ length: PARALLEL }, worker));
 
   status.textContent = "Sending results…";
   try {

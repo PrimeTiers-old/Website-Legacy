@@ -135,3 +135,74 @@
   padding: 12px 14px;
   margin: 0 0 16px;
 }
+.net-groups {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+.net-group {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+}
+.net-group summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.net-group summary::-webkit-details-marker {
+  display: none;
+}
+.net-group summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-right: 1.5px solid var(--text-dim);
+  border-bottom: 1.5px solid var(--text-dim);
+  transform: rotate(-45deg);
+  transition: transform 0.2s var(--ease);
+}
+.net-group[open] summary::before {
+  transform: rotate(45deg);
+}
+.net-group summary:hover {
+  background: var(--surface-hi);
+  border-radius: 12px;
+}
+.net-group-name {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+}
+.net-group-name small {
+  font-family: var(--font-body);
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+.net-group-best {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  text-align: right;
+}
+.net-group-best[data-grade="good"] { color: #4ade80; }
+.net-group-best[data-grade="ok"] { color: #facc15; }
+.net-group-best[data-grade="bad"] { color: #f87171; }
+.net-group .net-list {
+  margin: 0;
+  padding: 4px 14px 14px 33px;
+}
+@media (max-width: 520px) {
+  .net-group summary {
+    flex-wrap: wrap;
+  }
+  .net-group-best {
+    flex-basis: 100%;
+    text-align: left;
+    padding-left: 19px;
+  }
+}
