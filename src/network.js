@@ -92,10 +92,10 @@ const ASIA = [
     note: "carrier test servers",
     targets: [
       { id: "pk-khi-ptcl", label: "Karachi (PTCL)", url: "https://speedtest3.ptcl.net.prod.hosts.ooklaserver.net:8080/hello", method: "GET", cors: true },
-      { id: "pk-khi-cyber", label: "Karachi (Cybernet)", url: "https://karachi-speedtest.cyber.net.pk.prod.hosts.ooklaserver.net:8080/hello", method: "GET", cors: true },
-      { id: "pk-lhe-tes", label: "Lahore (Transworld)", url: "https://speedtestlhr.tes.com.pk:8080/hello", method: "GET", cors: true },
-      { id: "pk-isb-tes", label: "Islamabad (Transworld)", url: "https://speedtestisb.tes.com.pk:8080/hello", method: "GET", cors: true },
-      { id: "pk-isb-nayatel", label: "Islamabad (Nayatel)", url: "https://speedtest.nayatel.com:8080/hello", method: "GET", cors: true },
+      { id: "pk-khi-cyber", label: "Karachi (Cybernet)", url: "https://karachi-speedtest.cyber.net.pk.prod.hosts.ooklaserver.net:8080/hello", method: "GET" },
+      { id: "pk-lhe-tes", label: "Lahore (Transworld)", url: "https://speedtestlhr.tes.com.pk:8080/hello", method: "GET" },
+      { id: "pk-isb-tes", label: "Islamabad (Transworld)", url: "https://speedtestisb.tes.com.pk:8080/hello", method: "GET" },
+      { id: "pk-isb-nayatel", label: "Islamabad (Nayatel)", url: "https://speedtest.nayatel.com:8080/hello", method: "GET" },
     ],
   },
   {
@@ -310,7 +310,19 @@ function show(t, text, ms) {
 //   noQuery  don't add a cache-busting ?t= (Hetzner drops any request with a
 //            query string); cache: "no-store" still bypasses the browser cache
 //   cors     real CORS request without cookies, for servers that allow our
-//            origin (Ookla). That's how Ookla's own browser test talks to them.
+//            origin (only PTCL's Ookla server does).
+// Every request is sent without a Referer: Hetzner drops requests that have one.
+// The newest Resource Timing entry for `name` that started after `since`,
+// waiting up to 2 s for the browser to finish the response.
+async function timingEntry(name, since) {
+  const deadline = performance.now() + 2000;
+  for (;;) {
+    const entry = performance.getEntriesByName(name).filter((e) => e.startTime >= since - 1).pop();
+    if (entry || performance.now() > deadline) return entry;
+    await new Promise((r) => setTimeout(r, 5));
+  }
+}
+
 async function once(t) {
   const url = t.noQuery ? t.url : `${t.url}?t=${Math.random().toString(36).slice(2)}`;
   const ctrl = new AbortController();
@@ -322,11 +334,16 @@ async function once(t) {
       mode: t.cors ? "cors" : "no-cors",
       credentials: t.cors ? "omit" : "include",
       cache: "no-store",
+      referrerPolicy: "no-referrer",
       signal: ctrl.signal,
     });
-    if (t.cors) await res.arrayBuffer(); // finish the body so the connection is reused
+    if (t.cors) await res.arrayBuffer();
     const end = performance.now();
-    const entry = performance.getEntriesByName(new URL(url, location.href).href).pop();
+    // fetch() resolves when the headers arrive. Wait until the browser has the
+    // whole response (its timing entry appears) before the next sample;
+    // otherwise the connection is still busy and the next request opens a new
+    // one, adding a TCP + TLS handshake (~3x the real ping).
+    const entry = await timingEntry(new URL(url, location.href).href, start);
     if (entry && entry.requestStart > 0 && entry.responseStart > entry.requestStart) {
       return entry.responseStart - entry.requestStart;
     }
