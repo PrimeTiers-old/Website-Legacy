@@ -7,10 +7,13 @@ import { API_BASE } from "./data.js";
 
 // Ids must match TARGETS in API/src/network.rs.
 const TARGETS = [
-  { id: "vultr-blr", label: "Vultr Bangalore", url: "https://blr-in-ping.vultr.com/" },
-  { id: "vultr-del", label: "Vultr Delhi", url: "https://del-in-ping.vultr.com/" },
-  { id: "vultr-bom", label: "Vultr Mumbai", url: "https://bom-in-ping.vultr.com/" },
+  { id: "vultr-blr", label: "Vultr Bangalore", url: "https://blr-in-ping.vultr.com/favicon.ico" },
+  { id: "vultr-del", label: "Vultr Delhi", url: "https://del-in-ping.vultr.com/favicon.ico" },
+  { id: "vultr-bom", label: "Vultr Mumbai", url: "https://bom-in-ping.vultr.com/favicon.ico" },
 ];
+// Each URL is a small static file: the server answers it instantly, so one
+// request ≈ one network round trip (ping). Don't use "/" — Vultr builds that
+// page per request, which added ~150 ms of server time.
 // LightNode Karachi's test IP (38.60.217.49) only answers ICMP, which browsers
 // can't send, so players can add it by hand after the auto report.
 
