@@ -221,6 +221,28 @@ const SECTIONS = [
     note: "Spectrum entry point",
     targets: [{ id: "cloudflare-edge", label: "Nearest edge", url: "/cdn-cgi/trace", method: "GET", readColo: true }],
   },
+  {
+    // Minecraft proxy, anycast (AS64199): each player reaches the nearest node.
+    // Its edges only speak Minecraft, so this is a TCP probe (see tcpProbe).
+    name: "TCPShield",
+    note: "Minecraft proxy, anycast",
+    targets: [{ id: "tcpshield-edge", label: "Nearest edge", url: "https://104.234.6.1:25565/", tcpProbe: true }],
+  },
+  {
+    // NeoProtect GameShield (AS199414). Its anycast address is only given out
+    // in the customer panel; this public edge is in Frankfurt.
+    name: "NeoProtect",
+    note: "Minecraft proxy",
+    targets: [{ id: "neoprotect-fra", label: "Frankfurt edge", url: "https://82.22.5.100:25565/", tcpProbe: true }],
+  },
+  {
+    // Modal is serverless, with no public per-region test server. All traffic
+    // to Modal enters in Virginia (us-east) unless an app sets routing_region,
+    // so this is Modal's default entry point.
+    name: "Modal",
+    note: "default entry point, US East",
+    targets: [{ id: "modal-use", label: "Virginia (us-east)", url: "https://api.modal.com/" }],
+  },
   ] },
   { name: "Asia", groups: ASIA },
   { name: "Europe", groups: EUROPE },
@@ -312,6 +334,30 @@ function show(t, text, ms) {
 //   cors     real CORS request without cookies, for servers that allow our
 //            origin (only PTCL's Ookla server does).
 // Every request is sent without a Referer: Hetzner drops requests that have one.
+// For servers that only speak Minecraft (TCPShield, NeoProtect): the browser
+// opens a TCP connection (1 round trip), sends a TLS hello, and the proxy
+// closes it straight away (1 more). The request fails, and half of the time
+// to failure is the round trip. Checked: both proxies reject in ~1 RTT.
+async function tcpProbe(t) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  const start = performance.now();
+  try {
+    await fetch(`${t.url}?t=${Math.random().toString(36).slice(2)}`, {
+      mode: "no-cors",
+      cache: "no-store",
+      referrerPolicy: "no-referrer",
+      signal: ctrl.signal,
+    });
+  } catch {
+    /* expected: the proxy closes the connection */
+  } finally {
+    clearTimeout(timer);
+  }
+  if (ctrl.signal.aborted) throw new Error("timeout");
+  return (performance.now() - start) / 2;
+}
+
 // The newest Resource Timing entry for `name` that started after `since`,
 // waiting up to 2 s for the browser to finish the response.
 async function timingEntry(name, since) {
@@ -324,6 +370,7 @@ async function timingEntry(name, since) {
 }
 
 async function once(t) {
+  if (t.tcpProbe) return tcpProbe(t);
   const url = t.noQuery ? t.url : `${t.url}?t=${Math.random().toString(36).slice(2)}`;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
