@@ -1,5 +1,6 @@
-// /network: times HTTPS round trips from the visitor's browser to candidate
-// server locations and posts the results to the API (saved in MongoDB).
+// /network: on load, times round trips from the visitor's browser straight to
+// candidate server locations (direct to the provider's IP, no Cloudflare in
+// the path), then posts the results to the API (saved in MongoDB).
 import "./styles/base.css";
 import "./styles/network.css";
 import { API_BASE } from "./data.js";
@@ -10,43 +11,42 @@ const TARGETS = [
   { id: "vultr-del", label: "Vultr Delhi", url: "https://del-in-ping.vultr.com/" },
   { id: "vultr-bom", label: "Vultr Mumbai", url: "https://bom-in-ping.vultr.com/" },
 ];
-// LightNode Karachi test IP (38.60.217.49) only answers ICMP, so it's entered by hand.
-const MANUAL_ID = "lightnode-khi";
+// LightNode Karachi's test IP (38.60.217.49) only answers ICMP, which browsers
+// can't send, so players can add it by hand after the auto report.
 
 const SAMPLES = 8;
 const TIMEOUT_MS = 4000;
 
-const results = new Map();
 const $ = (id) => document.getElementById(id);
-const list = $("net-auto");
-const runBtn = $("net-run");
-const sendBtn = $("net-send");
 const status = $("net-status");
 
-function row(t) {
+for (const t of TARGETS) {
   const li = document.createElement("li");
-  li.innerHTML = `<span class="net-name"></span><span class="net-bar"><i></i></span><span class="net-ms mono">–</span>`;
+  li.innerHTML = `<span class="net-name"></span><span class="net-bar"><i></i></span><span class="net-ms mono">waiting</span>`;
   li.querySelector(".net-name").textContent = t.label;
   t.el = li;
-  list.append(li);
+  $("net-auto").append(li);
 }
-TARGETS.forEach(row);
 
 function show(t, text, ms) {
   t.el.querySelector(".net-ms").textContent = text;
-  const bar = t.el.querySelector(".net-bar i");
-  bar.style.width = ms == null ? "0" : `${Math.max(4, 100 - Math.min(ms, 400) / 4)}%`;
+  t.el.querySelector(".net-bar i").style.width = ms == null ? "0" : `${Math.max(4, 100 - Math.min(ms, 400) / 4)}%`;
   t.el.dataset.grade = ms == null ? "bad" : ms < 80 ? "good" : ms < 160 ? "ok" : "bad";
 }
 
-async function once(url) {
+// One HEAD request. Uses the browser's own network timing for the request
+// (Resource Timing), which leaves out JavaScript and event-loop delay; falls
+// back to performance.now() if the entry is missing.
+async function once(base) {
+  const url = `${base}?t=${Math.random().toString(36).slice(2)}`;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   const start = performance.now();
   try {
-    // no-cors + HEAD: we only need the timing, not the response.
-    await fetch(`${url}?t=${Math.random()}`, { method: "HEAD", mode: "no-cors", cache: "no-store", signal: ctrl.signal });
-    return performance.now() - start;
+    await fetch(url, { method: "HEAD", mode: "no-cors", cache: "no-store", signal: ctrl.signal });
+    const end = performance.now();
+    const entry = performance.getEntriesByName(url).pop();
+    return entry && entry.duration > 0 ? entry.duration : end - start;
   } finally {
     clearTimeout(timer);
   }
@@ -55,7 +55,7 @@ async function once(url) {
 async function measure(t) {
   show(t, "testing…", null);
   try {
-    await once(t.url); // warm-up: DNS + TCP + TLS, not counted
+    await once(t.url); // warm-up: opens the connection (DNS, TCP, TLS), not counted
     const times = [];
     for (let i = 0; i < SAMPLES; i++) {
       times.push(await once(t.url));
@@ -63,22 +63,44 @@ async function measure(t) {
     }
     times.sort((a, b) => a - b);
     const ms = times[Math.floor(times.length / 2)];
-    results.set(t.id, { id: t.id, ms, min: times[0], manual: false });
     show(t, `${Math.round(ms)} ms`, ms);
+    return { id: t.id, ms, min: times[0], manual: false };
   } catch {
-    results.set(t.id, { id: t.id, ms: null, min: null, manual: false });
     show(t, "failed", null);
+    return { id: t.id, ms: null, min: null, manual: false };
   }
 }
 
-runBtn.addEventListener("click", async () => {
-  runBtn.disabled = sendBtn.disabled = true;
-  runBtn.textContent = "Testing…";
-  status.textContent = "";
-  for (const t of TARGETS) await measure(t);
-  runBtn.disabled = sendBtn.disabled = false;
-  runBtn.textContent = "Run again";
-});
+async function post(path, payload) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error ?? `error ${res.status}`);
+  return body;
+}
+
+let token = null;
+
+async function run() {
+  status.textContent = "Testing… keep this page open.";
+  performance.setResourceTimingBufferSize?.(500);
+  const results = [];
+  for (const t of TARGETS) results.push(await measure(t));
+
+  status.textContent = "Sending results…";
+  try {
+    const res = await post("/api/network/report", { results });
+    token = res.token;
+    if (res.relay) $("net-relay").hidden = false;
+    status.textContent = "Done. Your results were sent. Thanks!";
+    $("net-extra").hidden = false;
+  } catch (e) {
+    status.textContent = `Couldn't send your results (${e.message}). Reload the page to try again.`;
+  }
+}
 
 document.querySelectorAll("[data-copy]").forEach((btn) => {
   btn.addEventListener("click", async () => {
@@ -92,31 +114,27 @@ document.querySelectorAll("[data-copy]").forEach((btn) => {
   });
 });
 
-sendBtn.addEventListener("click", async () => {
-  const payload = { results: [...results.values()] };
+$("net-send").addEventListener("click", async () => {
+  const out = $("net-extra-status");
   const khi = parseFloat($("net-khi").value);
-  if (Number.isFinite(khi) && khi >= 0) payload.results.push({ id: MANUAL_ID, ms: khi, manual: true });
-  const name = $("net-name").value.trim();
-  if (name) payload.name = name;
   const trace = $("net-trace").value.trim();
+  const payload = { token };
+  if (Number.isFinite(khi) && khi >= 0) payload.khi_ms = khi;
   if (trace) payload.trace = trace;
-
-  sendBtn.disabled = true;
-  status.textContent = "Sending…";
-  try {
-    const res = await fetch(`${API_BASE}/api/network/report`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) {
-      status.textContent = "Thanks! Your results were sent.";
-      return;
-    }
-    const body = await res.json().catch(() => ({}));
-    status.textContent = `Couldn't send: ${body.error ?? res.status}`;
-  } catch {
-    status.textContent = "Couldn't reach the server. Try again in a moment.";
+  if (!payload.khi_ms && !payload.trace) {
+    out.textContent = "Paste at least one result first.";
+    return;
   }
-  sendBtn.disabled = false;
+  const btn = $("net-send");
+  btn.disabled = true;
+  out.textContent = "Sending…";
+  try {
+    await post("/api/network/report/extra", payload);
+    out.textContent = "Added to your report. Thanks!";
+  } catch (e) {
+    out.textContent = `Couldn't send (${e.message}).`;
+    btn.disabled = false;
+  }
 });
+
+run();

@@ -24,55 +24,45 @@
 
       <h1>Network test</h1>
       <p class="net-lead">
-        Some players reach our server through Singapore instead of a direct route. This test checks how fast you
-        reach a few possible server locations. It takes about 20 seconds. Then send us the results.
+        Some players reach our server through Singapore instead of a direct route. This page checks how fast you
+        reach a few possible server locations and sends the results to us automatically. Keep it open for about
+        15 seconds.
+      </p>
+      <p class="net-warn" id="net-relay" hidden>
+        You seem to be on a VPN, Cloudflare WARP or iCloud Private Relay, so these numbers don't show your real
+        route. Turn it off and reload this page.
       </p>
 
       <section class="net-card" aria-labelledby="auto-title">
-        <div class="net-card-head">
-          <h2 id="auto-title">1. Browser test</h2>
-          <button class="btn btn-primary" type="button" id="net-run">Start test</button>
-        </div>
+        <h2 id="auto-title">Your results</h2>
         <ul class="net-list" id="net-auto"></ul>
+        <p class="net-status" id="net-status" role="status" aria-live="polite">Starting test…</p>
       </section>
 
-      <section class="net-card" aria-labelledby="manual-title">
-        <h2 id="manual-title">2. Karachi test (optional)</h2>
+      <section class="net-card" id="net-extra" aria-labelledby="extra-title" hidden>
+        <h2 id="extra-title">Want to help more? (optional)</h2>
         <p>
-          The browser can't reach LightNode Karachi, so you have to run this one yourself. Open Command Prompt
-          (Windows key, type <span class="mono">cmd</span>, press Enter) and run:
+          Open Command Prompt (Windows key, type <span class="mono">cmd</span>, press Enter) and run these two
+          commands. Paste the results below.
         </p>
         <div class="net-cmd">
           <code class="mono" id="cmd-ping">ping -n 10 38.60.217.49</code>
           <button class="btn btn-glass btn-sm" type="button" data-copy="cmd-ping">Copy</button>
         </div>
         <label class="net-field">
-          <span>Paste the <b>Average</b> number from the last line (ms)</span>
+          <span>LightNode Karachi: the <b>Average</b> number from the last line (ms)</span>
           <input type="number" id="net-khi" min="0" max="10000" step="1" inputmode="numeric" placeholder="e.g. 85" />
         </label>
-      </section>
-
-      <section class="net-card" aria-labelledby="trace-title">
-        <h2 id="trace-title">3. Route to our server (optional)</h2>
-        <p>This shows the path your connection takes to Primetiers.net. It can take a minute to finish.</p>
         <div class="net-cmd">
           <code class="mono" id="cmd-trace">tracert primetiers.net</code>
           <button class="btn btn-glass btn-sm" type="button" data-copy="cmd-trace">Copy</button>
         </div>
         <label class="net-field">
-          <span>Paste everything it prints</span>
+          <span>Route to our server: paste everything it prints (can take a minute)</span>
           <textarea id="net-trace" rows="6" maxlength="8000" spellcheck="false"></textarea>
         </label>
-      </section>
-
-      <section class="net-card" aria-labelledby="send-title">
-        <h2 id="send-title">4. Send results</h2>
-        <label class="net-field">
-          <span>Minecraft username (optional)</span>
-          <input type="text" id="net-name" maxlength="32" autocomplete="off" placeholder="Steve" />
-        </label>
-        <button class="btn btn-primary btn-lg" type="button" id="net-send" disabled>Send results</button>
-        <p class="net-status" id="net-status" role="status" aria-live="polite"></p>
+        <button class="btn btn-primary" type="button" id="net-send">Add to my report</button>
+        <p class="net-status" id="net-extra-status" role="status" aria-live="polite"></p>
       </section>
     </main>
 
