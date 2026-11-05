@@ -12,6 +12,14 @@ import { API_BASE } from "./data.js";
 // Ids are stored in MongoDB; keep them stable.
 const GROUPS = [
   {
+    // The Cloudflare data center this player lands on: the first hop for
+    // Spectrum, which would then carry traffic to our server over Cloudflare's
+    // network. Same-origin, so we can read which colo answered.
+    name: "Cloudflare",
+    note: "Spectrum entry point",
+    targets: [{ id: "cloudflare-edge", label: "Nearest edge", url: "/cdn-cgi/trace", method: "GET", readColo: true }],
+  },
+  {
     name: "Vultr",
     targets: [
       { id: "vultr-blr", label: "Bangalore", url: "https://blr-in-ping.vultr.com/favicon.ico" },
@@ -137,7 +145,8 @@ function updateGroup(g) {
     return;
   }
   const best = ok.reduce((a, b) => (b.ms < a.ms ? b : a));
-  g.best.textContent = g.targets.length > 1 ? `best ${Math.round(best.ms)} ms · ${best.label}` : `${Math.round(best.ms)} ms`;
+  g.best.textContent =
+    g.targets.length > 1 || best.readColo ? `best ${Math.round(best.ms)} ms · ${best.label}` : `${Math.round(best.ms)} ms`;
   g.best.dataset.grade = grade(best.ms);
 }
 
@@ -165,6 +174,16 @@ async function once(base, method = "HEAD") {
   }
 }
 
+// Reads `colo=XXX` from Cloudflare's /cdn-cgi/trace (same-origin, so readable).
+async function readColo(url) {
+  try {
+    const text = await (await fetch(url, { cache: "no-store" })).text();
+    return text.match(/^colo=([A-Z]{3})$/m)?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function measure(t) {
   show(t, "testing…", null);
   try {
@@ -179,7 +198,16 @@ async function measure(t) {
     const ms = sorted[Math.floor(sorted.length / 2)];
     show(t, `${Math.round(ms)} ms`, ms);
     t.ms = ms;
-    return { id: t.id, samples: times }; // in the order taken, for jitter
+    const result = { id: t.id, samples: times }; // in the order taken, for jitter
+    if (t.readColo) {
+      const colo = await readColo(t.url);
+      if (colo) {
+        result.colo = colo;
+        t.label = `${t.label} (${colo})`;
+        t.el.querySelector(".net-name").textContent = t.label;
+      }
+    }
+    return result;
   } catch {
     show(t, "failed", null);
     t.ms = null;
