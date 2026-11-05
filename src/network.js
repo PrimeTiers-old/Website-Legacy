@@ -56,6 +56,15 @@ const GROUPS = [
     ],
   },
   {
+    // PowerupStack's own ping endpoints (from its site). Hosted on OVH.
+    // They reject HEAD (405), so these use GET; the body is 4 bytes ("pong").
+    name: "PowerupStack",
+    targets: [
+      { id: "powerupstack-bom", label: "Mumbai", url: "https://mum01.powerupstack.net/v1/ping", method: "GET" },
+      { id: "powerupstack-sgp", label: "Singapore", url: "https://asia-sgp09.powerupstack.com/v1/ping", method: "GET" },
+    ],
+  },
+  {
     name: "IBM Cloud",
     targets: [
       { id: "ibm-bom", label: "Mumbai", url: "https://s3.in-mum.cloud-object-storage.appdomain.cloud/" },
@@ -74,8 +83,6 @@ const GROUPS = [
   },
 ];
 const TARGETS = GROUPS.flatMap((g) => g.targets);
-// LightNode Karachi's test IP (38.60.217.49) only answers ICMP, which browsers
-// can't send, so players can add it by hand after the auto report.
 
 const SAMPLES = 8;
 const TIMEOUT_MS = 4000;
@@ -143,13 +150,13 @@ function show(t, text, ms) {
 // One HEAD request. Uses the browser's own network timing for the request
 // (Resource Timing), which leaves out JavaScript and event-loop delay; falls
 // back to performance.now() if the entry is missing.
-async function once(base) {
+async function once(base, method = "HEAD") {
   const url = `${base}?t=${Math.random().toString(36).slice(2)}`;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   const start = performance.now();
   try {
-    await fetch(url, { method: "HEAD", mode: "no-cors", cache: "no-store", signal: ctrl.signal });
+    await fetch(url, { method, mode: "no-cors", cache: "no-store", signal: ctrl.signal });
     const end = performance.now();
     const entry = performance.getEntriesByName(url).pop();
     return entry && entry.duration > 0 ? entry.duration : end - start;
@@ -161,21 +168,22 @@ async function once(base) {
 async function measure(t) {
   show(t, "testing…", null);
   try {
-    await once(t.url); // warm-up: opens the connection (DNS, TCP, TLS), not counted
+    await once(t.url, t.method); // warm-up: opens the connection (DNS, TCP, TLS), not counted
     const times = [];
     for (let i = 0; i < SAMPLES; i++) {
-      times.push(await once(t.url));
+      times.push(await once(t.url, t.method));
       show(t, `${Math.round(Math.min(...times))} ms…`, Math.min(...times));
     }
-    times.sort((a, b) => a - b);
-    const ms = times[Math.floor(times.length / 2)];
+    // Display only; the API computes median/min/max/jitter from the raw samples.
+    const sorted = [...times].sort((a, b) => a - b);
+    const ms = sorted[Math.floor(sorted.length / 2)];
     show(t, `${Math.round(ms)} ms`, ms);
     t.ms = ms;
-    return { id: t.id, ms, min: times[0], manual: false };
+    return { id: t.id, samples: times }; // in the order taken, for jitter
   } catch {
     show(t, "failed", null);
     t.ms = null;
-    return { id: t.id, ms: null, min: null, manual: false };
+    return { id: t.id, samples: [] };
   } finally {
     updateGroup(t.group);
   }
@@ -233,15 +241,12 @@ document.querySelectorAll("[data-copy]").forEach((btn) => {
 
 $("net-send").addEventListener("click", async () => {
   const out = $("net-extra-status");
-  const khi = parseFloat($("net-khi").value);
   const trace = $("net-trace").value.trim();
-  const payload = { token };
-  if (Number.isFinite(khi) && khi >= 0) payload.khi_ms = khi;
-  if (trace) payload.trace = trace;
-  if (!payload.khi_ms && !payload.trace) {
-    out.textContent = "Paste at least one result first.";
+  if (!trace) {
+    out.textContent = "Paste the tracert output first.";
     return;
   }
+  const payload = { token, trace };
   const btn = $("net-send");
   btn.disabled = true;
   out.textContent = "Sending…";

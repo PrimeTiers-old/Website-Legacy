@@ -42,23 +42,15 @@
       <section class="net-card" id="net-extra" aria-labelledby="extra-title" hidden>
         <h2 id="extra-title">Want to help more? (optional)</h2>
         <p>
-          Open Command Prompt (Windows key, type <span class="mono">cmd</span>, press Enter) and run these two
-          commands. Paste the results below.
+          Open Command Prompt (Windows key, type <span class="mono">cmd</span>, press Enter), run this command,
+          and paste everything it prints below. It shows the path your connection takes to our server.
         </p>
-        <div class="net-cmd">
-          <code class="mono" id="cmd-ping">ping -n 10 38.60.217.49</code>
-          <button class="btn btn-glass btn-sm" type="button" data-copy="cmd-ping">Copy</button>
-        </div>
-        <label class="net-field">
-          <span>LightNode Karachi: the <b>Average</b> number from the last line (ms)</span>
-          <input type="number" id="net-khi" min="0" max="10000" step="1" inputmode="numeric" placeholder="e.g. 85" />
-        </label>
         <div class="net-cmd">
           <code class="mono" id="cmd-trace">tracert primetiers.net</code>
           <button class="btn btn-glass btn-sm" type="button" data-copy="cmd-trace">Copy</button>
         </div>
         <label class="net-field">
-          <span>Route to our server: paste everything it prints (can take a minute)</span>
+          <span>tracert output (can take a minute to finish)</span>
           <textarea id="net-trace" rows="6" maxlength="8000" spellcheck="false"></textarea>
         </label>
         <button class="btn btn-primary" type="button" id="net-send">Add to my report</button>
