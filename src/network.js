@@ -10,15 +10,7 @@ import { API_BASE } from "./data.js";
 // in-region IP whose response time matches its TCP round trip. Don't use pages
 // the server builds per request (Vultr's "/" added ~150 ms).
 // Ids are stored in MongoDB; keep them stable.
-const GROUPS = [
-  {
-    // The Cloudflare data center this player lands on: the first hop for
-    // Spectrum, which would then carry traffic to our server over Cloudflare's
-    // network. Same-origin, so we can read which colo answered.
-    name: "Cloudflare",
-    note: "Spectrum entry point",
-    targets: [{ id: "cloudflare-edge", label: "Nearest edge", url: "/cdn-cgi/trace", method: "GET", readColo: true }],
-  },
+const ASIA = [
   {
     name: "Vultr",
     targets: [
@@ -99,18 +91,18 @@ const GROUPS = [
     name: "Pakistan",
     note: "carrier test servers",
     targets: [
-      { id: "pk-khi-ptcl", label: "Karachi (PTCL)", url: "https://speedtest3.ptcl.net.prod.hosts.ooklaserver.net:8080/hello", method: "GET" },
-      { id: "pk-khi-cyber", label: "Karachi (Cybernet)", url: "https://karachi-speedtest.cyber.net.pk.prod.hosts.ooklaserver.net:8080/hello", method: "GET" },
-      { id: "pk-lhe-tes", label: "Lahore (Transworld)", url: "https://speedtestlhr.tes.com.pk:8080/hello", method: "GET" },
-      { id: "pk-isb-tes", label: "Islamabad (Transworld)", url: "https://speedtestisb.tes.com.pk:8080/hello", method: "GET" },
-      { id: "pk-isb-nayatel", label: "Islamabad (Nayatel)", url: "https://speedtest.nayatel.com:8080/hello", method: "GET" },
+      { id: "pk-khi-ptcl", label: "Karachi (PTCL)", url: "https://speedtest3.ptcl.net.prod.hosts.ooklaserver.net:8080/hello", method: "GET", cors: true },
+      { id: "pk-khi-cyber", label: "Karachi (Cybernet)", url: "https://karachi-speedtest.cyber.net.pk.prod.hosts.ooklaserver.net:8080/hello", method: "GET", cors: true },
+      { id: "pk-lhe-tes", label: "Lahore (Transworld)", url: "https://speedtestlhr.tes.com.pk:8080/hello", method: "GET", cors: true },
+      { id: "pk-isb-tes", label: "Islamabad (Transworld)", url: "https://speedtestisb.tes.com.pk:8080/hello", method: "GET", cors: true },
+      { id: "pk-isb-nayatel", label: "Islamabad (Nayatel)", url: "https://speedtest.nayatel.com:8080/hello", method: "GET", cors: true },
     ],
   },
   {
-    // Hetzner's official Singapore test site. Couldn't confirm it answers from
-    // a script (it closed the connection); browsers will show "failed" if not.
+    // Hetzner's official Singapore test site. It drops HEAD requests and any
+    // request with a query string, so it's a plain GET of the 323-byte index.
     name: "Hetzner Cloud",
-    targets: [{ id: "hetzner-sin", label: "Singapore", url: "https://sin-speed.hetzner.com/100MB.bin" }],
+    targets: [{ id: "hetzner-sin", label: "Singapore", url: "https://sin-speed.hetzner.com/", method: "GET", noQuery: true }],
   },
   {
     name: "IBM Cloud",
@@ -130,6 +122,110 @@ const GROUPS = [
     targets: [{ id: "alibaba-sgp", label: "Singapore", url: "https://oss-ap-southeast-1.aliyuncs.com/" }],
   },
 ];
+
+// Europe. OVHcloud is left out here on purpose. PowerupStack's EU nodes run on
+// OVH's network.
+const EUROPE = [
+  {
+    name: "Vultr",
+    targets: [
+      { id: "vultr-fra", label: "Frankfurt", url: "https://fra-de-ping.vultr.com/favicon.ico" },
+      { id: "vultr-ams", label: "Amsterdam", url: "https://ams-nl-ping.vultr.com/favicon.ico" },
+      { id: "vultr-lon", label: "London", url: "https://lon-gb-ping.vultr.com/favicon.ico" },
+      { id: "vultr-par", label: "Paris", url: "https://par-fr-ping.vultr.com/favicon.ico" },
+    ],
+  },
+  {
+    name: "Hetzner Cloud",
+    targets: [
+      { id: "hetzner-fsn", label: "Falkenstein", url: "https://fsn1-speed.hetzner.com/", method: "GET", noQuery: true },
+      { id: "hetzner-nbg", label: "Nuremberg", url: "https://nbg1-speed.hetzner.com/", method: "GET", noQuery: true },
+      { id: "hetzner-hel", label: "Helsinki", url: "https://hel1-speed.hetzner.com/", method: "GET", noQuery: true },
+    ],
+  },
+  {
+    name: "Microsoft Azure",
+    targets: [
+      { id: "azure-ams", label: "Amsterdam (West Europe)", url: "https://s3westeurope.blob.core.windows.net/public/latency-test.json" },
+      { id: "azure-dub", label: "Dublin (North Europe)", url: "https://s3northeurope.blob.core.windows.net/public/latency-test.json" },
+      { id: "azure-fra", label: "Frankfurt", url: "https://s3germanywestcentral.blob.core.windows.net/public/latency-test.json" },
+      { id: "azure-lon", label: "London", url: "https://s3uksouth.blob.core.windows.net/public/latency-test.json" },
+    ],
+  },
+  {
+    name: "Google Cloud",
+    note: "via Google's network",
+    targets: [
+      { id: "gcp-fra", label: "Frankfurt", url: "https://europe-west3-5tkroniexa-ey.a.run.app/api/ping" },
+      { id: "gcp-lon", label: "London", url: "https://europe-west2-5tkroniexa-nw.a.run.app/api/ping" },
+      { id: "gcp-ams", label: "Netherlands", url: "https://europe-west4-5tkroniexa-ez.a.run.app/api/ping" },
+    ],
+  },
+  {
+    name: "Linode (Akamai)",
+    targets: [
+      { id: "linode-fra", label: "Frankfurt", url: "https://eu-central-1.linodeobjects.com/" },
+      { id: "linode-lon", label: "London", url: "https://gb-lon-1.linodeobjects.com/" },
+      { id: "linode-ams", label: "Amsterdam", url: "https://nl-ams-1.linodeobjects.com/" },
+      { id: "linode-par", label: "Paris", url: "https://fr-par-1.linodeobjects.com/" },
+    ],
+  },
+  {
+    name: "PowerupStack",
+    note: "on OVH's network",
+    targets: [
+      { id: "powerupstack-rbx", label: "Roubaix", url: "https://eu-west-rbx01.powerupstack.com/v1/ping", method: "GET" },
+      { id: "powerupstack-fra", label: "Frankfurt", url: "https://lim01.powerupstack.net/v1/ping", method: "GET" },
+      { id: "powerupstack-lon", label: "London", url: "https://uk01.powerupstack.net/v1/ping", method: "GET" },
+    ],
+  },
+  {
+    name: "WiseHosting",
+    note: "Minecraft",
+    targets: [
+      { id: "wisehosting-fra", label: "Frankfurt", url: "https://de.ping.wisehosting.com:444/" },
+      { id: "wisehosting-lon", label: "London", url: "https://uk.ping.wisehosting.com:444/" },
+      { id: "wisehosting-hel", label: "Helsinki", url: "https://fi.ping.wisehosting.com:444/" },
+    ],
+  },
+  {
+    name: "IBM Cloud",
+    targets: [
+      { id: "ibm-fra", label: "Frankfurt", url: "https://s3.eu-de.cloud-object-storage.appdomain.cloud/" },
+      { id: "ibm-lon", label: "London", url: "https://s3.eu-gb.cloud-object-storage.appdomain.cloud/" },
+    ],
+  },
+  {
+    name: "Civo",
+    targets: [
+      { id: "civo-lon", label: "London", url: "https://objectstore.lon1.civo.com/" },
+      { id: "civo-fra", label: "Frankfurt", url: "https://objectstore.fra1.civo.com/" },
+    ],
+  },
+  {
+    name: "Alibaba Cloud",
+    targets: [
+      { id: "alibaba-fra", label: "Frankfurt", url: "https://oss-eu-central-1.aliyuncs.com/" },
+      { id: "alibaba-lon", label: "London", url: "https://oss-eu-west-1.aliyuncs.com/" },
+    ],
+  },
+];
+
+const SECTIONS = [
+  { name: null, groups: [
+  {
+    // The Cloudflare data center this player lands on: the first hop for
+    // Spectrum, which would then carry traffic to our server over Cloudflare's
+    // network. Same-origin, so we can read which colo answered.
+    name: "Cloudflare",
+    note: "Spectrum entry point",
+    targets: [{ id: "cloudflare-edge", label: "Nearest edge", url: "/cdn-cgi/trace", method: "GET", readColo: true }],
+  },
+  ] },
+  { name: "Asia", groups: ASIA },
+  { name: "Europe", groups: EUROPE },
+];
+const GROUPS = SECTIONS.flatMap((sec) => sec.groups);
 const TARGETS = GROUPS.flatMap((g) => g.targets);
 
 const SAMPLES = 8;
@@ -140,7 +236,17 @@ const status = $("net-status");
 
 // One collapsible section per provider. The summary line shows the provider's
 // best location, so players don't need to open anything.
-for (const g of GROUPS) {
+for (const sec of SECTIONS) {
+  if (sec.name) {
+    const h = document.createElement("h3");
+    h.className = "net-section";
+    h.textContent = sec.name;
+    $("net-auto").append(h);
+  }
+  for (const g of sec.groups) renderGroup(g);
+}
+
+function renderGroup(g) {
   const box = document.createElement("details");
   box.className = "net-group";
   box.innerHTML = `<summary><span class="net-group-name"></span><span class="net-group-best mono">waiting</span></summary><ul class="net-list"></ul>`;
@@ -193,18 +299,37 @@ function show(t, text, ms) {
   t.el.dataset.grade = grade(ms);
 }
 
-// One HEAD request. Uses the browser's own network timing for the request
-// (Resource Timing), which leaves out JavaScript and event-loop delay; falls
-// back to performance.now() if the entry is missing.
-async function once(base, method = "HEAD") {
-  const url = `${base}?t=${Math.random().toString(36).slice(2)}`;
+// One request (HEAD unless the target sets `method`). Timing, best first:
+// 1. Server sends Timing-Allow-Origin: request sent -> first byte back, which
+//    is exactly one round trip even if the browser opened a new connection.
+// 2. Otherwise the browser's own duration for the request (Resource Timing),
+//    which leaves out JavaScript and event-loop delay.
+// 3. performance.now() if there's no timing entry.
+// Target options:
+//   method   "GET" for servers that reject HEAD
+//   noQuery  don't add a cache-busting ?t= (Hetzner drops any request with a
+//            query string); cache: "no-store" still bypasses the browser cache
+//   cors     real CORS request without cookies, for servers that allow our
+//            origin (Ookla). That's how Ookla's own browser test talks to them.
+async function once(t) {
+  const url = t.noQuery ? t.url : `${t.url}?t=${Math.random().toString(36).slice(2)}`;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   const start = performance.now();
   try {
-    await fetch(url, { method, mode: "no-cors", cache: "no-store", signal: ctrl.signal });
+    const res = await fetch(url, {
+      method: t.method ?? "HEAD",
+      mode: t.cors ? "cors" : "no-cors",
+      credentials: t.cors ? "omit" : "include",
+      cache: "no-store",
+      signal: ctrl.signal,
+    });
+    if (t.cors) await res.arrayBuffer(); // finish the body so the connection is reused
     const end = performance.now();
-    const entry = performance.getEntriesByName(url).pop();
+    const entry = performance.getEntriesByName(new URL(url, location.href).href).pop();
+    if (entry && entry.requestStart > 0 && entry.responseStart > entry.requestStart) {
+      return entry.responseStart - entry.requestStart;
+    }
     return entry && entry.duration > 0 ? entry.duration : end - start;
   } finally {
     clearTimeout(timer);
@@ -224,10 +349,10 @@ async function readColo(url) {
 async function measure(t) {
   show(t, "testing…", null);
   try {
-    await once(t.url, t.method); // warm-up: opens the connection (DNS, TCP, TLS), not counted
+    await once(t); // warm-up: opens the connection (DNS, TCP, TLS), not counted
     const times = [];
     for (let i = 0; i < SAMPLES; i++) {
-      times.push(await once(t.url, t.method));
+      times.push(await once(t));
       show(t, `${Math.round(Math.min(...times))} ms…`, Math.min(...times));
     }
     // Display only; the API computes median/min/max/jitter from the raw samples.
